@@ -8,4 +8,4 @@
 
 Запуск проекта : npm run dev
 
-Публичная ссылка на Netlify : cute-griffin-cb966e.netlify.app
+Публичная ссылка на Netlify : jazzy-strudel-13126d.netlify.app
