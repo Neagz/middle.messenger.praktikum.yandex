@@ -1,0 +1,26 @@
+<main>
+    <div class="center">
+        <div class="box-profile">
+            <form action="#" id="profile-form">
+                <div class="box__title_profile box__title_main">
+                    Профиль
+                </div>
+
+                <div class="form-items form-items__profile form-items__border-bottom">
+                    {{> Input label="Почта" id="email" type="email" value="neagz@yandex.ru" readonly="true" }}
+                    {{> Input label="Логин" id="login" type="text" value="neagz" readonly="true" }}
+                    {{> Input label="Имя" id="first_name" type="text" value="Андрей" readonly="true" }}
+                    {{> Input label="Фамилия" id="second_name" type="text" value="Быстров" readonly="true" }}
+                    {{> Input label="Имя в чате" id="username" type="text" value="Андрей Б." readonly="true" }}
+                    {{> Input label="Телефон" id="phone" type="text" value="+7 (999) 668 02 50" readonly="true" }}
+                </div>
+
+                <div class="group-buttons group-buttons__profile form-items__border-bottom">
+                    {{> Link page="profile_edit" position="left" style="profile_primary" name="Изменить данные"}}
+                    {{> Link page="profile_password" position="left" style="profile_primary" name="Изменить пароль"}}
+                    {{> Link page="nav" position="left" style="profile_secondary" name="Выйти"}}
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
