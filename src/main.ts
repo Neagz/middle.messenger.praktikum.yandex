@@ -32,8 +32,15 @@ function navigate(page: string){
     container.innerHTML = temlpatingFunction (context);
 }
 
-document.addEventListener('DOMContentLoaded', () => navigate('nav'));
+function init() {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const page = urlParams.get('page');
+    console.log(page);
+    navigate(page ? page : 'nav');
+}
 
+document.addEventListener('DOMContentLoaded', init);
 
 document.addEventListener('click', e => {
     //@ts-ignore
