@@ -1,3 +1,13 @@
+:root {
+  --color-bg-primary: #ffffff;
+  --color-divider: #eaeaea;
+  --color-text-muted: #999999;
+  --color-text-main: #1e1e1e;
+  --color-border-focus: #3369f3;
+  --color-danger: #ff0000;
+  --colot-danger-light: #ff2e2e;
+}
+
 html, body, #app {
   height: 100%;
   margin: 0;
@@ -41,7 +51,7 @@ footer {
   width: 100%;
   padding-left: 30px;
   padding-right: 30px;
-  background: #ffffff;
+  background: var(--color-bg-primary);
   border-radius: 12px;
   max-width: 340px;
 }
@@ -50,7 +60,7 @@ footer {
   width: 100%;
   padding-left: 30px;
   padding-right: 30px;
-  background: #ffffff;
+  background: var(--color-bg-primary);
   border-radius: 12px;
   max-width: 570px;
 }
@@ -91,7 +101,7 @@ footer {
 }
 
 .form-items__border-bottom > div:not(:last-child), .form-items__border-bottom > a:not(:last-child) {
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid var(--color-divider);
 }
 
 .form-items__profile {
@@ -114,13 +124,13 @@ footer {
   text-align: left;
   flex: none;
 
-  color: #999999;
+  color: var(--color-text-muted);
 }
 
 .form-item__input {
   width: 100%;
   border: none;
-  border-bottom: 1px solid #3369f3;
+  border-bottom: 1px solid var(--color-border-focus);
   padding: 6px 0;
 
   font-weight: 500;
@@ -128,7 +138,7 @@ footer {
   line-height: 13px;
   text-align: left;
 
-  color: #1e1e1e;
+  color: var(--color-text-main);
 }
 
 .group-buttons{
@@ -150,7 +160,7 @@ footer {
   line-height: 13px;
   text-align: left;
 
-  color: #1e1e1e;
+  color: var(--color-text-main);
 }
 
 .form-items__profile .form-item__input {
@@ -164,7 +174,7 @@ footer {
   line-height: 13px;
   text-align: right;
 
-  color: #999999;
+  color: var(--color-text-muted);
 }
 
 .btn {
@@ -182,8 +192,8 @@ footer {
 }
 
 .btn__primary {
-  background: #3369f3;
-  color: #ffffff;
+  background: var(--color-border-focus);
+  color: var(--color-bg-primary);
 }
 
 .form-item__error {
@@ -192,7 +202,7 @@ footer {
   font-size: 8px;
   line-height: 8px;
 
-  color: #ff2e2e;
+  color: var(--colot-danger-light);
 }
 
 .error__title {
@@ -202,7 +212,7 @@ footer {
   text-align: center;
   margin-bottom: 20px;
 
-  color: #1e1e1e;
+  color: var(--color-text-main);
 }
 
 .error__description {
@@ -212,7 +222,7 @@ footer {
   text-align: center;
   margin-bottom: 69px;
 
-  color: #1e1e1e;
+  color: var(--color-text-main);
 }
 
 .link {
@@ -230,7 +240,7 @@ footer {
   line-height: 13px;
   text-decoration: none;
 
-  color: #3369f3;
+  color: var(--color-border-focus);
 }
 
 .link__profile_secondary{
@@ -241,7 +251,7 @@ footer {
   line-height: 13px;
   text-decoration: none;
 
-  color: #ff0000;
+  color: var(--color-danger);
 }
 
 .link__center{
@@ -249,11 +259,11 @@ footer {
 }
 
 .link__primary {
-  color: #3369f3;
+  color: var(--color-border-focus);
 }
 
 .link__secondary {
-  color: #ff0000;
+  color: var(--color-danger);
 }
 
 .error__link {
