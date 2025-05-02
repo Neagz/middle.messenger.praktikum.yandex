@@ -1,0 +1,26 @@
+<main>
+    <div class="center">
+        <div class="box box__shadow">
+            <form action="#" id="registration-form">
+                <div class="box__title box__title_main">
+                    Регистрация
+                </div>
+
+                <div class="form-items">
+                    {{> Input label="Почта" name="email" id="email" type="email" }}
+                    {{> Input label="Логин" name="login" id="login" type="text" errorName="Неверный логин" }}
+                    {{> Input label="Имя" name="first_name" id="first_name" type="text" }}
+                    {{> Input label="Фамилия" name="second_name" id="second_name" type="text" }}
+                    {{> Input label="Телефон" name="phone" id="phone" type="text"}}
+                    {{> Input label="Пароль" name="password" id="password" type="password" }}
+                    {{> Input label="Пароль (еще раз)" name="confirm_password" id="confirm_password" type="password" errorName="Пароли не совпадают" }}
+                </div>
+
+                <div class="group-buttons">
+                    {{> Button page="nav" name="Зарегистрироваться" type="submit" style="primary" }}
+                    {{> Link page="login" position="center" style="primary" name="Войти"}}
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
