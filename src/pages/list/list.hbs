@@ -1,17 +1,110 @@
-<main>
-    <div class="center">
-        <div class="error">
-            <div class="error__title">
-                Здесь будет Чат
-            </div>
+<div class="chat-container">
+    <!-- Левая панель (контакты) -->
+    <div class="sidebar">
+        <!-- Секция профиля -->
+        <div class="profile-section">
+            {{> Link page="profile" position="center" style="profile_chat" name="Профиль >" }}
+        </div>
 
-            <div class="error__description">
-                Сейчас он на доработке
-            </div>
+        <!-- Поиск -->
+        <div class="search-bar">
+            <input type="text" placeholder="Поиск">
+            <button class="search-icon">🔍</button>
+        </div>
 
-            <div class="error__link">
-                {{> Link page="nav" position="center" style="primary" name="Выход"}}
+        <!-- Список контактов -->
+        <ul class="contacts-list">
+            <!-- Активный контакт -->
+            <li class="contact-item active">
+                <img class="avatar">
+                <div class="contact-info">
+                    <span class="name">Вадим</span>
+                    <span class="last-message">Круто!</span>
+                </div>
+                <div class="meta">
+                    <span class="timestamp">12:00</span>
+                </div>
+            </li>
+            <!-- Другие контакты -->
+            <li class="contact-item">
+                <img class="avatar">
+                <div class="contact-info">
+                    <span class="name">Анна</span>
+                    <span class="last-message">Смотри, что нашла</span>
+                </div>
+                <div class="meta">
+                    <span class="timestamp">11:30</span>
+                    <span class="badge">1</span>
+                </div>
+            </li>
+
+            <li class="contact-item">
+                <img class="avatar">
+                <div class="contact-info">
+                    <span class="name">Дмитрий</span>
+                    <span class="last-message">Привет! Как дела?</span>
+                </div>
+                <div class="meta">
+                    <span class="timestamp">10:15</span>
+                </div>
+            </li>
+
+            <li class="contact-item">
+                <img class="avatar">
+                <div class="contact-info">
+                    <span class="name">Екатерина</span>
+                    <span class="last-message">Согласен с этим</span>
+                </div>
+                <div class="meta">
+                    <span class="timestamp">9:45</span>
+                    <span class="badge">3</span>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Основное окно чата -->
+    <div class="chat-window">
+        <!-- Заголовок -->
+        <div class="header">
+            <div class="user-details">
+                <img class="avatar">
+                <span class="name">Вадим</span>
+            </div>
+            <div class="menu">
+                <button class="more-options">...</button>
             </div>
         </div>
+
+        <!-- Область сообщений -->
+        <div class="messages-container">
+            <!-- Входящее сообщение -->
+            <div class="message incoming">
+                <div class="content">
+                    <p>Привет! Смотри, тут всплыл интересный кусок лунной истории...</p>
+                    <span class="timestamp">19 июня</span>
+                </div>
+            </div>
+
+            <!-- Исходящее сообщение -->
+            <div class="message outgoing">
+                <div class="content">
+                    <p>Круто!</p>
+                    <span class="timestamp">12:00</span>
+                </div>
+            </div>
+
+            <!-- Изображение -->
+            <div class="message image-message">
+                <img src="camera.jpg" alt="Фото">
+                <span class="timestamp">11:56</span>
+            </div>
+        </div>
+
+        <!-- Форма отправки сообщения -->
+        <form class="message-form">
+            <input type="text" placeholder="Сообщение" class="message-input">
+            <button type="submit" class="send-button">→</button>
+        </form>
     </div>
-</main>
+</div>

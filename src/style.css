@@ -254,6 +254,14 @@ footer {
   color: var(--color-danger);
 }
 
+.link__profile_chat{
+  display: block;
+  padding: 10px;
+  color: #999999;
+  font-size: small;
+  text-align: right;
+}
+
 .link__center{
   margin: 0 auto;
 }

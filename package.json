@@ -12,6 +12,10 @@
     "node": "23.8.0"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "@typescript-eslint/parser": "^8.32.0",
+    "eslint": "^9.26.0",
+    "stylelint": "^16.19.1",
     "typescript": "~5.7.2",
     "vite": "^6.2.0"
   },
