@@ -8,6 +8,7 @@
 
 1) Уcтановка стабильной версии: npm install
 2) Запуск проекта : npm run start
+3) Запуск линтера: npm run lint
 
 [Ccылка на макет в Figma](https://www.figma.com/design/jF5fFFzgGOxQeB4CmKWTiE/Chat_external_link?node-id=0-1&p=f)
 
