@@ -1,0 +1,24 @@
+<div class="{{#if active}}contact-item__active{{/if}}">
+    <div class="contact-item">
+        <div class="contact-item__avatar">
+            <img src="{{avatar}}" class="contact-item__avatar-image" alt="Аватар {{username}}">
+        </div>
+        <div class="contact-item__info">
+            <div class="contact-item__name">{{name}}</div>
+            {{#if fromMe}}
+            <div class="contact-item__preview-from-me">
+                <div class="contact-item__preview-your">Вы: </div>
+                <div class="contact-item__preview">{{preview}}</div>
+            </div>
+            {{else}}
+            <div class="contact-item__preview">{{preview}}</div>
+            {{/if}}
+        </div>
+        <div class="contact-item__meta">
+            <div class="contact-item__time">
+                <div class="contact-item__time-stamp">{{timestamp}}</div>
+            </div>
+            {{#if unread}}<div class="contact-item__unread-count">{{unread}}</div>{{/if}}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,14 @@
+<div class="dialog-container">
+    <div class="dialog-container__remove">
+        <h2 class="dialog__title">{{title}}</h2>
+        <div class="dialog__body">
+            {{> @partial-block }}
+        </div>
+        <div class="dialog__footer">
+            {{> Button page="list" name="Удалить" type="submit" style="primary" }}
+            {{#if labelCancel}}
+                {{> Button page="nav" name="Отменить" type="submit" style="primary" }}
+            {{/if}}
+        </div>
+    </div>
+</div>

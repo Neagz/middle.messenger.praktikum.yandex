@@ -15,7 +15,9 @@ const pages: Record<string, PageEntry> = {
   profile: [Pages.ProfilePage, {}],
   profile_edit: [Pages.ProfileEditPage, {}],
   profile_password: [Pages.ProfilePasswordPage, {}],
-  list: [Pages.ListPage, {}],
+  list: [Pages.ListPage, {
+    showDialog: true
+  }],
 };
 
 Object.entries(Components).forEach(([name, template]: [string, string]) => {
@@ -26,15 +28,15 @@ function navigate(page: string) {
   const [source, context] = pages[page];
   const container = document.getElementById('app')!;
 
-  const temlpatingFunction = Handlebars.compile(source);
-  container.innerHTML = temlpatingFunction(context);
+  const templatingFunction = Handlebars.compile(source);
+  container.innerHTML = templatingFunction(context);
 }
 
 function init() {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   const page = urlParams.get('page');
-  navigate(page || 'nav');
+  navigate(page || 'list');
 }
 
 document.addEventListener('DOMContentLoaded', init);

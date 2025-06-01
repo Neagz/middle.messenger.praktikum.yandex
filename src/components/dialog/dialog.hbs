@@ -1,0 +1,26 @@
+<div class="dialog dialog-{{type}} {{#if Image}}dialog--image{{/if}}">
+    {{#if Image}}
+        <p class="dialog__image-container">
+            <img src="{{content}}" class="dialog__image" alt="Изображение в чате">
+        </p>
+        <span class="dialog__time dialog__time--image">{{time}}</span>
+    {{else}}
+        {{#if Outgoing}}
+            <div class="dialog__content">
+                <p class="dialog__text">{{content}}</p>
+                <div class="dialog__status">
+                    <span class="dialog__checkmark">
+                        <span class="dialog__checkmark-line-1"></span>
+                        <span class="dialog__checkmark-line-2"></span>
+                        <span class="dialog__checkmark-line-3"></span>
+                    </span>
+                    <span class="dialog__time--outgoing">{{time}}</span>
+                </div>
+            </div>
+        {{else}}
+            <p class="dialog__text">{{content}}</p>
+            {{#if Multiple}}<p></p><p class="dialog__text">{{content-two}}</p>{{/if}}
+            <p class="dialog__time--incoming">{{time}}</p>
+        {{/if}}
+    {{/if}}
+</div>

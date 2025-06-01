@@ -1,224 +1,39 @@
-<main>
-    <div class="chat-container">
-        <div class="left-column">
-            <div class="profile-selection">
-                <div class="profile-info">
-                    {{> Link page="profile" position="center" style="chats" name="Профиль >" }}
-                </div>
+<main class="page">
+    <div class="chat">
+        <div class="chat__sidebar">
+            <div class="chat__profile">
+                {{> Link page="profile" position="center" style="chats" name="Профиль >" }}
             </div>
-            <div class="search-bar">
-                <input type="text" placeholder="🔍︎ Поиск">
+            <div class="chat__search">
+                {{> Input class="--search" id="search" type="text" name="search" value="🔍︎ Поиск" }}
             </div>
-            <div class="contacts-list">
-                <div class="contact-item">
-                    <div class="avatar">
-                        <img src="/avatar.png">
-                    </div>
-                    <div class="contact-info">
-                        <div class="name">Андрей</div>
-                        <div class="preview">Изображение</div>
-                    </div>
-                    <div class="right-bar">
-                        <div class="timestamp-container">
-                            <div class="timestamp">10:49</div>
-                        </div>
-                        <div class="unread-count">2</div>
-                    </div>
-                </div>
-                <div class="contact-item">
-                    <div class="avatar">
-                        <img src="avatar.png">
-                    </div>
-                    <div class="contact-info">
-                        <div class="name">Киноклуб</div>
-                        <div class="preview-old">
-                            <div class="preview-your">Вы: </div>
-                            <div class="preview">стикер</div>
-                        </div>
-                    </div>
-                    <div class="right-bar">
-                        <div class="timestamp-container">
-                            <div class="timestamp">12:00</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="contact-item">
-                    <div class="avatar">
-                        <img src="avatar.png">
-                    </div>
-                    <div class="contact-info">
-                        <div class="name">Илья</div>
-                        <div class="preview">Друзья, у меня для вас особенный выпуск новостей!...</div>
-                    </div>
-                    <div class="right-bar">
-                        <div class="timestamp-container">
-                            <div class="timestamp">15:12</div>
-                        </div>
-                        <div class="unread-count">4</div>
-                    </div>
-                </div>
-                <div class="contact-item__on">
-                    <div class="contact-item">
-                        <div class="avatar">
-                            <img src="avatar.png">
-                        </div>
-                        <div class="contact-info">
-                            <div class="name">Вадим</div>
-                            <div class="preview-old">
-                                <div class="preview-your">Вы: </div>
-                                <div class="preview">Круто!</div>
-                            </div>
-                        </div>
-                        <div class="right-bar">
-                            <div class="timestamp-container">
-                                <div class="timestamp">Пт</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="contact-item">
-                    <div class="avatar">
-                        <img src="avatar.png">
-                    </div>
-                    <div class="contact-info">
-                        <div class="name">тет-а-теты</div>
-                        <div class="preview">И Human Interface Guidelines и Material Design рекомендуют...</div>
-                    </div>
-                    <div class="right-bar">
-                        <div class="timestamp-container">
-                            <div class="timestamp">Ср</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="contact-item">
-                    <div class="avatar">
-                        <img src="avatar.png">
-                    </div>
-                    <div class="contact-info">
-                        <div class="name">1, 2, 3</div>
-                        <div class="preview">Миллионы россиян ежедневно проводят десятки часов свое...</div>
-                    </div>
-                    <div class="right-bar">
-                        <div class="timestamp-container">
-                            <div class="timestamp">Пн</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="contact-item">
-                    <div class="avatar">
-                        <img src="avatar.png">
-                    </div>
-                    <div class="contact-info">
-                        <div class="name">Design Destroyer</div>
-                        <div class="preview">В 2008 году художник Jon Rafman начал собирать...</div>
-                    </div>
-                    <div class="right-bar">
-                        <div class="timestamp-container">
-                            <div class="timestamp">Пн</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="contact-item">
-                    <div class="avatar">
-                        <img src="avatar.png">
-                    </div>
-                    <div class="contact-info">
-                        <div class="name">Day.</div>
-                        <div class="preview">Так увлёкся работой по курсу, что совсем забыл его анонсир...</div>
-                    </div>
-                    <div class="right-bar">
-                        <div class="timestamp-container">
-                            <div class="timestamp">1 мая 2020</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="contact-item">
-                    <div class="avatar">
-                        <img src="avatar.png">
-                    </div>
-                    <div class="contact-info">
-                        <div class="name">Стас Рогозин</div>
-                        <div class="preview">Можно или сегодня или завтра вечером.</div>
-                    </div>
-                    <div class="right-bar">
-                        <div class="timestamp-container">
-                            <div class="timestamp">12 апреля 2020</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="chat__contacts">
+                {{> ContactItem avatar="avatar.png" name="Андрей" preview="Изображение" timestamp="10:49" unread="2" }}
+                {{> ContactItem avatar="avatar.png" name="Киноклуб" preview="стикер" timestamp="12:00" fromMe=true }}
+                {{> ContactItem avatar="avatar.png" name="Илья" preview="Друзья, у меня для вас особенный выпуск новостей!..." timestamp="15:12" unread="4" }}
+                {{> ContactItem avatar="avatar.png" name="Вадим" preview="Круто!" timestamp="Пт" fromMe=true active=true }}
+                {{> ContactItem avatar="avatar.png" name="тет-а-теты" preview="И Human Interface Guidelines и Material Design рекомендуют..." timestamp="Ср" }}
+                {{> ContactItem avatar="avatar.png" name="1, 2, 3" preview="Миллионы россиян ежедневно проводят десятки часов свое..." timestamp="Пн" }}
+                {{> ContactItem avatar="avatar.png" name="Design Destroyer" preview="В 2008 году художник Jon Rafman начал собирать..." timestamp="Пн" }}
+                {{> ContactItem avatar="avatar.png" name="Day." preview="Так увлёкся работой по курсу, что совсем забыл его анонсир..." timestamp="1 мая 2020" }}
+                {{> ContactItem avatar="avatar.png" name="Стас Рогозин" preview="Можно или сегодня или завтра вечером." timestamp="12 апреля 2020" }}
             </div>
         </div>
-        <div class="right-column">
-            <div class="chat-header">
-                <div class="user-info">
-                    <div class="avatar-header">
-                        <img src="avatar.png">
-                    </div>
-                    <div class="username">Вадим</div>
-                    <div class="actions">
-                        <button class="dots-button">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </button>
-                    </div>
-                </div>
+        <div class="chat__main">
+            {{> ChatHeader avatar="avatar.png" username="Вадим" }}
+            <div class="chat__messages">
+                <div class="chat__date">19 июня</div>
+                {{> Dialog type="incoming" Multiple=true content="Привет! Смотри, тут всплыл интересный кусок лунной космической истории — НАСА в какой-то момент попросила Хассельблад адаптировать модель SWC для полетов на Луну. Сейчас мы все знаем что астронавты летали с моделью 500 EL — и к слову говоря, все тушки этих камер все еще находятся на поверхности Луны, так как астронавты с собой забрали только кассеты с пленкой."
+                        content-two="Хассельблад в итоге адаптировал SWC для космоса, но что-то пошло не так и на ракету они так никогда и не попали. Всего их было произведено 25 штук, одну из них недавно продали на аукционе за 45000 евро." time="11:56"}}
+                {{> Dialog type="incoming" Image=true content="camera.png" time="11:56" }}
+                {{> Dialog type="outgoing" Outgoing=true content="Круто!" time="12:00" }}
             </div>
-            <div class="message-container">
-                <div class="date-coming">
-                    <span>19 июня</span>
-                </div>
-                <div class="message message-incoming">
-                    <p class="message-text">
-                        Привет! Смотри, тут всплыл интересный кусок лунной космической истории — НАСА в
-                        какой-то момент попросила Хассельблад адаптировать модель SWC для полетов на Луну.
-                        Сейчас мы все знаем что астронавты летали с моделью 500 EL — и к слову говоря, все
-                        тушки этих камер все еще находятся на поверхности Луны, так как астронавты с собой
-                        забрали только кассеты с пленкой.
-                    </p>
-                    <p></p>
-                    <p class="message-text">
-                        Хассельблад в итоге адаптировал SWC для космоса,
-                        но что-то пошло не так и на ракету они так никогда и не попали.
-                        Всего их было произведено 25 штук, одну из них недавно продали на аукционе за 45000 евро.
-                    </p>
-                    <p class="message-time__incoming">11:56</p>
-                </div>
-                <div class="message message-incoming__img">
-                    <p class="message-image">
-                        <img src="camera.png">
-                    </p>
-                    <p class="message-time__img">11:56</p>
-                </div>
-                <div class="message message-outgoing">
-                    <div class="message-content">
-                        <p class="message-text">Круто!</p>
-                        <div class="message-status">
-                            <span class="checkmark">
-                                <span class="line-5"></span>
-                                <span class="line-6"></span>
-                                <span class="line-7"></span>
-                            </span>
-                            <span class="message-time__outgoing">12:00</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="input-container">
-                <button class="attach-btn" title="Прикрепить файл">
-                    <svg id="Layer_1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                        <path d="m18.726 27.5c-3.281 3.273-8.693 3.174-12.188-.313-3.495-3.488-3.598-8.886-.314-12.158l11.227-11.207c2.355-2.35 6.238-2.275 8.765.243 2.524 2.521 2.592 6.392.235 8.741l-9.797 9.771c-1.428 1.426-3.784 1.395-5.338-.158-1.555-1.551-1.586-3.904-.158-5.33l5.489-5.479c.431-.401.454-1.077.052-1.509-.401-.43-1.075-.453-1.532-.028l-5.521 5.513c-2.277 2.272-2.17 6.017.158 8.34 2.328 2.321 6.084 2.438 8.363.164l9.795-9.779c3.204-3.196 3.055-8.467-.244-11.756-1.649-1.647-3.788-2.504-5.921-2.553-2.131-.048-4.258.709-5.859 2.309l-11.228 11.205c-4.132 4.121-3.945 10.922.322 15.182 4.271 4.26 11.075 4.438 15.206.316l8.361-8.342c.418-.416.418-1.094 0-1.512-.416-.417-1.094-.417-1.511 0z" fill="#000000" style="fill: rgb(153, 153, 153);"></path>
-                    </svg>
-                </button>
-                <textarea class="input-field" placeholder="Сообщение" rows="1"></textarea>
-                <button class="send-btn" title="Отправить">
-                    <span class="send-icon">
-                        <span class="line-1"></span>
-                        <span class="line-2"></span>
-                        <span class="line-3"></span>
-                    </span>
-                </button>
-            </div>
+            {{> Message}}
         </div>
+
+        {{#if showDialog}}
+            {{> RemoveDialog }}
+        {{/if}}
+
     </div>
 </main>

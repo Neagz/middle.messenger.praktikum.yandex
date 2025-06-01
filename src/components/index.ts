@@ -1,3 +1,9 @@
 export { Button } from './button/button.ts';
 export { Link } from './link/link.ts';
 export { Input } from './input/input.ts';
+export { ContactItem } from './contact-item/contact-item.ts';
+export { Dialog } from './dialog/dialog.ts';
+export { Message } from './message/message.ts';
+export { ChatHeader } from './chat-header/chat-header.ts';
+export { RemoveDialog } from './remove-dialog/remove-dialog.ts';
+export { RemoveChatDialog } from './remove-chat-dialog/remove-chat-dialog.ts';
