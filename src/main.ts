@@ -1,7 +1,6 @@
 import Handlebars from 'handlebars';
 import * as Components from './components/index.ts';
 import * as Pages from './pages/index.ts';
-
 import './style.css';
 
 type PageEntry = [string, Record<string, unknown>];
@@ -16,7 +15,20 @@ const pages: Record<string, PageEntry> = {
   profile_edit: [Pages.ProfileEditPage, {}],
   profile_password: [Pages.ProfilePasswordPage, {}],
   list: [Pages.ListPage, {
-    showDialog: true
+    contacts: [
+      {avatar:'avatar.png', name:'Андрей', preview:'Изображение', timestamp: '10:49', unread: '2'},
+      {avatar:'avatar.png', name:'Киноклуб', preview:'стикер', timestamp:'12:00', fromMe:true },
+      {avatar:'avatar.png', name:'Илья', preview:'Друзья, у меня для вас особенный выпуск новостей!...', timestamp:'15:12', unread:'4'},
+      {avatar:'avatar.png', name:'Вадим', preview:'Круто!', timestamp:'Пт', fromMe:true, active:true},
+      {avatar:'avatar.png', name:'тет-а-теты', preview:'И Human Interface Guidelines и Material Design рекомендуют...', timestamp:'Ср'},
+      {avatar:'avatar.png', name:'1, 2, 3', preview:'Миллионы россиян ежедневно проводят десятки часов свое...', timestamp:'Пн'},
+      {avatar:'avatar.png', name:'Design Destroyer', preview:'В 2008 году художник Jon Rafman начал собирать...', timestamp:'Пн'},
+      {avatar:'avatar.png', name:'Day.', preview:'Так увлёкся работой по курсу, что совсем забыл его анонсир...', timestamp:'1 мая 2020'},
+      {avatar:'avatar.png', name:'Стас Рогозин', preview:'Можно или сегодня или завтра вечером.', timestamp:'12 апреля 2020'}
+    ],
+    showDialog: false,
+    showActionDialogMessage: false,
+    showActionDialogUser: false
   }],
 };
 

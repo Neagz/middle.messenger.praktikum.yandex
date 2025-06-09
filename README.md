@@ -15,7 +15,7 @@
 Ссылки на все свёрстанные страницы:
 - [Вход](http://localhost:3000/?page=login)
 - [Регистрация](http://localhost:3000/?page=registration)
-- [Чат (Заглушка)](http://localhost:3000/?page=list)
+- [Чат](http://localhost:3000/?page=list)
 - [Профиль](http://localhost:3000/?page=profile)
 - [Изменить профиль](http://localhost:3000/?page=profile_edit)
 - [Изменить пароль](http://localhost:3000/?page=profile_password)
