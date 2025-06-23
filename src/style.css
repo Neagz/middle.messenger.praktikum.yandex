@@ -893,3 +893,17 @@ footer {
   box-sizing: border-box;
   margin-right: 15px;
 }
+
+.my-button {
+  padding: 10px 20px;
+  background: #3369F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.my-button:hover {
+  opacity: 0.9;
+}
