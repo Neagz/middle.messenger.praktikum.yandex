@@ -745,12 +745,14 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
+
 }
 
 .message-input__attach-icon {
   width: 32px;
   height: 32px;
   transition: color 0.2s;
+  background-image: url('/public/icon_attach.svg');
 }
 
 .dialog-container{
