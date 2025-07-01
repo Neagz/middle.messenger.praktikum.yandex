@@ -203,6 +203,7 @@ footer {
   width: 100%;
   padding: 12px;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .btn__primary {
@@ -894,16 +895,39 @@ footer {
   margin-right: 15px;
 }
 
-.my-button {
-  padding: 10px 20px;
-  background: #3369F3;
-  color: white;
+.my-button, .my-button-two {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  font-size: 16px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 16px;
 }
 
-.my-button:hover {
-  opacity: 0.9;
+.my-button {
+  background: #3369F3;
+  color: white;
+}
+
+.my-button-two {
+  background: #f33333;
+  color: white;
+}
+
+.message--error {
+  border: 1px solid var(--color-danger);
+}
+
+.message-input__error {
+  position: absolute;
+  bottom: -18px;
+  left: 20px;
+  font-size: 10px;
+  color: var(--color-danger);
+  background: white;
+  padding: 2px 5px;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }

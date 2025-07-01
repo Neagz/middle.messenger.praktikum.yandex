@@ -1,27 +1,25 @@
-import Block from "../../core/block";
+import { Block } from "../../core/block";
+import template from './test-button.hbs?raw'; // Импорт шаблона
 
 interface TestButtonProps {
     text: string;
+    page?: string;
     className?: string;
     events?: {
         click?: (e: Event) => void;
+        mouseover?: (e: Event) => void;
     };
 }
 
-export default class TestButton extends Block {
+export class TestButton extends Block {
     constructor(props: TestButtonProps) {
         super({
             ...props,
-            tagName: 'button',
-            attr: {
-                class: props.className || '',
-                type: 'button'
-            }
+            events: props.events || {}
         });
     }
 
-    render() {
-        // Возвращаем только текст для кнопки
-        return this.props.text;
+    protected render(): DocumentFragment {
+        return this.compile(template, this.props); // Используем импортированный шаблон
     }
 }

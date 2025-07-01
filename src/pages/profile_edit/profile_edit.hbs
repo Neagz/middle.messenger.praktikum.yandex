@@ -7,16 +7,16 @@
                 </div>
 
                 <div class="form-items form-items__profile form-items__border-bottom">
-                    {{> Input label="Почта" name="email" id="email" type="email" value="neagz@yandex.ru" }}
-                    {{> Input label="Логин" name="login" id="login" type="text" value="neagz" }}
-                    {{> Input label="Имя" name="first_name" id="first_name" type="text" value="Андрей" }}
-                    {{> Input label="Фамилия" name="second_name" id="second_name" type="text" value="Быстров" }}
-                    {{> Input label="Имя в чате" name="display_name" id="display_name" type="text" value="Андрей Б." }}
-                    {{> Input label="Телефон" name="phone" id="phone" type="text" value="+7 (999) 668 02 50" }}
+                    {{{ inputEmail }}}
+                    {{{ inputLogin }}}
+                    {{{ inputFirstName }}}
+                    {{{ inputSecondName }}}
+                    {{{ inputDisplayName }}}
+                    {{{ inputPhone }}}
                 </div>
 
                 <div class="group-buttons">
-                    {{> Button page="profile" name="Сохранить" type="submit" style="primary" }}
+                    {{{ button }}}
                 </div>
             </form>
         </div>

@@ -1,38 +1,28 @@
-/* eslint-disable @typescript-eslint/ban-types */
-export type EventCallback = (...args: any[]) => void;
+type Handler = (...args: any[]) => void; // Тип для обработчиков событий
 
-export default class EventBus {
-    private listeners: Record<string, EventCallback[]>;
+export class EventBus {
+    private listeners: Record<string, Handler[]> = {}; // Хранилище обработчиков
 
-    constructor() {
-        this.listeners = {};
+    // Подписка на событие
+    on(event: string, callback: Handler) {
+        if (!this.listeners[event]) this.listeners[event] = []; // Инициализация массива
+        this.listeners[event].push(callback); // Добавление обработчика
     }
 
-    public on(event: string, callback: EventCallback): void {
-        if (!this.listeners[event]) {
-            this.listeners[event] = [];
-        }
-
-        this.listeners[event].push(callback);
-    }
-
-    public off(event: string, callback: EventCallback): void {
-        if (!this.listeners[event]) {
-            throw new Error(`No event: ${event}`);
-        }
-
+    // Отписка от события
+    off(event: string, callback: Handler) {
+        if (!this.listeners[event]) throw new Error(`Нет события: ${event}`);
         this.listeners[event] = this.listeners[event].filter(
-            listener => listener !== callback,
+            listener => listener !== callback // Фильтрация обработчиков
         );
     }
 
-    public emit(event: string, ...args: any[]): void {
-        if (!this.listeners[event]) {
-            throw new Error(`No event: ${event}`);
-        }
-
-        this.listeners[event].forEach(listener => {
-            listener(...args);
-        });
+    // Инициирование события
+    emit(event: string, ...args: any[]) {
+        if (!this.listeners[event]) return; // Проверка наличия
+        this.listeners[event].forEach(listener => listener(...args)); // Вызов обработчиков
     }
 }
+
+// Добавляем именованный экспорт
+export default EventBus;

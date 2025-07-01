@@ -1,57 +1,26 @@
 import Handlebars from 'handlebars';
 import './style.css';
-import * as Components from './components';
-import * as Pages from './pages';
-import './pages/test_page/test_page';
+import * as Pages from './pages'; // Страницы
+import * as Components from './components'; // Компоненты
+import { Block } from "./core/block"; // Базовый класс
 
-// 1. Тип для конфигурации страницы
+// Тип для конфигурации страницы
 type PageConfig = {
-  template: string;
-  initFunction?: (context: any) => void;
-  context?: any;
+  template: typeof Block; // Конструктор страницы
+  context?: Record<string, any>; // Данные для страницы
 };
 
-// 2. Конфигурация всех страниц
+// Конфигурация страниц
 const pagesConfig: Record<string, PageConfig> = {
-  test_page: {
-    template: Pages.TestPage,
-    initFunction: Pages.initTestPage,
-    context: {
-      title: "Тестовая страница с кнопкой",
-    }
-  },
-  login: {
-    template: Pages.LoginPage,
-    context: {}
-  },
-  registration: {
-    template: Pages.RegistrationPage,
-    context: {}
-  },
-  nav: {
-    template: Pages.NavigatePage,
-    context: {}
-  },
-  '500': {
-    template: Pages.Page500,
-    context: {}
-  },
-  '404': {
-    template: Pages.Page404,
-    context: {}
-  },
-  profile: {
-    template: Pages.ProfilePage,
-    context: {}
-  },
-  profile_edit: {
-    template: Pages.ProfileEditPage,
-    context: {}
-  },
-  profile_password: {
-    template: Pages.ProfilePasswordPage,
-    context: {}
-  },
+  test_page: { template: Pages.TestPage },
+  login: { template: Pages.LoginPage },
+  registration: { template: Pages.RegistrationPage },
+  nav: { template: Pages.NavigatePage }, // Страница с ошибкой partial
+  '500': { template: Pages.Page500 },
+  '404': { template: Pages.Page404 },
+  profile: { template: Pages.ProfilePage },
+  profile_edit: { template: Pages.ProfileEditPage },
+  profile_password: { template: Pages.ProfilePasswordPage },
   list: {
     template: Pages.ListPage,
     context: {
@@ -67,76 +36,71 @@ const pagesConfig: Record<string, PageConfig> = {
         {avatar:'avatar.png', name:'Стас Рогозин', preview:'Можно или сегодня или завтра вечером.', timestamp:'12 апреля 2020'}
       ],
       showDialog: false,
-      showActionDialogMessage: false,
-      showActionDialogUser: false
+      showActionDialogMessage: true,
+      showActionDialogUser: true
     }
   }
 };
 
-// 3. Регистрация компонентов
-Object.entries(Components).forEach(([name, component]) => {
-  if (typeof component !== 'string') return;
-  Handlebars.registerPartial(name, component);
+// Улучшенная регистрация хелперов с поддержкой вложенного контента
+Object.entries(Components).forEach(([componentName, ComponentClass]) => {
+  Handlebars.registerHelper(componentName, function (this: any, ...args: any[]) {
+    const options = args.pop() as Handlebars.HelperOptions;
+    const context = this || {};
+    const props = { ...context, ...options.hash };
+
+    // Поддержка вложенного контента
+    if (options.fn) {
+      props.content = options.fn(this);
+    }
+
+    const instance = new (ComponentClass as any)(props);
+    return new Handlebars.SafeString(instance.getContent()?.outerHTML || '');
+  });
 });
 
-// 4. Функция навигации
-function navigate(page: string, additionalContext: any = {}) {
-  // Получаем конфиг страницы или используем 404
-  const config = pagesConfig[page] || pagesConfig['404'];
+// Навигация между страницами
+function navigate(page: string) {
+  const config = pagesConfig[page] || pagesConfig['404']; // Конфиг или 404
+  const container = document.getElementById('app'); // Контейнер приложения
 
-  // Объединяем контексты
-  const context = {
-    ...config.context,
-    ...additionalContext
-  };
+  if (!container) return console.error('Контейнер #app не найден');
 
-  // Рендерим шаблон
-  const container = document.getElementById('app');
-  if (!container) {
-    console.error('Контейнер #app не найден');
-    return;
-  }
-
-  container.innerHTML = Handlebars.compile(config.template)(context);
-
-  // Вызываем функцию инициализации, если она есть
-  if (config.initFunction) {
-    try {
-      config.initFunction(context);
-      console.log(`Страница ${page} успешно инициализирована`);
-    } catch (e) {
-      console.error(`Ошибка при инициализации страницы ${page}:`, e);
+  try {
+    const pageInstance = new config.template(config.context || {}); // Создание страницы
+    const content = pageInstance.getContent(); // Получение контента
+    if (content) {
+      container.innerHTML = '';
+      container.appendChild(content); // Вставка в DOM
+      pageInstance.dispatchComponentDidMount(); // Инициирование монтирования
     }
+  } catch (e) {
+    console.error(`Ошибка при рендеринге страницы ${page}:`, e);
+    if (page !== '500') navigate('500'); // Переход на страницу ошибки
   }
 }
 
-// 5. Инициализация приложения
+// Инициализация приложения
 function init() {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const page = urlParams.get('page') || 'nav'; // По умолчанию навигация
-
+  const urlParams = new URLSearchParams(window.location.search);
+  const page = urlParams.get('page') || 'list'; // Страница из URL или nav
   navigate(page);
 }
 
-// 6. Обработчик кликов для навигации
-function setupGlobalListeners() {
-  document.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    const page = target.getAttribute('page');
-    if (page) {
-      navigate(page);
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
-}
-
-// 7. Запуск приложения
-document.addEventListener('DOMContentLoaded', () => {
-  init();
-  setupGlobalListeners();
+// Глобальная навигация по кликам
+document.addEventListener('click', (e) => {
+  const target = e.target as HTMLElement;
+  const page = target.closest('[page]')?.getAttribute('page'); // Поиск атрибута page
+  if (page) {
+    navigate(page); // Переход
+    e.preventDefault(); // Отмена стандартного поведения
+    e.stopPropagation(); // Остановка всплытия
+  }
 });
 
-// 8. Экспорт для возможности ручного вызова навигации
-export { navigate };
+// Запуск при загрузке DOM
+document.addEventListener('DOMContentLoaded', init);
+
+// Экспорт навигации в глобальную область
+declare global { interface Window { navigate: (page: string) => void; } }
+window.navigate = navigate;

@@ -7,18 +7,18 @@
                 </div>
 
                 <div class="form-items form-items__profile form-items__border-bottom">
-                    {{> Input label="Почта" name="email" id="email" type="email" value="neagz@yandex.ru" readonly="true" }}
-                    {{> Input label="Логин" name="login" id="login" type="text" value="neagz" readonly="true" }}
-                    {{> Input label="Имя" name="first_name" id="first_name" type="text" value="Андрей" readonly="true" }}
-                    {{> Input label="Фамилия" name="second_name" id="second_name" type="text" value="Быстров" readonly="true" }}
-                    {{> Input label="Имя в чате" name="display_name" id="display_name" type="text" value="Андрей Б." readonly="true" }}
-                    {{> Input label="Телефон" name="phone" id="phone" type="text" value="+7 (999) 668 02 50" readonly="true" }}
+                    {{{ inputEmail }}}
+                    {{{ inputLogin }}}
+                    {{{ inputFirstName }}}
+                    {{{ inputSecondName }}}
+                    {{{ inputDisplayName }}}
+                    {{{ inputPhone }}}
                 </div>
 
                 <div class="group-buttons group-buttons__profile form-items__border-bottom">
-                    {{> Link page="profile_edit" position="left" style="profile_primary" name="Изменить данные"}}
-                    {{> Link page="profile_password" position="left" style="profile_primary" name="Изменить пароль"}}
-                    {{> Link page="nav" position="left" style="profile_secondary" name="Выйти"}}
+                    {{{ linkEdit }}}
+                    {{{ linkPassword }}}
+                    {{{ linkLogout }}}
                 </div>
             </form>
         </div>

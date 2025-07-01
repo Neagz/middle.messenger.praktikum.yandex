@@ -1,19 +1,5 @@
-<div class="message-input">
-    <div class="message__actions">
-        <button class="message-input__attach-btn" aria-label="Прикрепить файл" title="Прикрепить файл">
-            <img src="/public/icon_attach.svg" class="message-input__attach-icon" alt="">
-        </button>
-        {{#if showActionDialogMessage}}
-            {{> ActionDialogMessage}}
-        {{/if}}
-    </div>
-    <label for="message" class="visually-hidden"></label>
-    <input id="message" class="message" placeholder="Сообщение">
-    <button class="message-input__send-btn" title="Отправить">
-        <span class="message-input__send-icon">
-            <span class="message-input__send-icon-line-1"></span>
-            <span class="message-input__send-icon-line-2"></span>
-            <span class="message-input__send-icon-line-3"></span>
-        </span>
-    </button>
-</div>
+<input id="{{id}}" class="message {{class}}" placeholder="{{placeholder}}" autocomplete="off" name="{{name}}" value="{{value}}">
+
+{{#if error}}
+    <div class="message-input__error">{{error}}</div>
+{{/if}}

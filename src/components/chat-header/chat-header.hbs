@@ -12,7 +12,10 @@
             <span></span>
         </button>
         {{#if showActionDialogUser}}
-            {{> ActionDialogUser}}
+            <div class="chat-header__actions-dialog">
+                {{{DotsButton icon="add" name="Добавить пользователя"}}}
+                {{{DotsButton icon="remove" name="Удалить пользователя" className="remove-button"}}}
+            </div>
         {{/if}}
     </div>
 </div>

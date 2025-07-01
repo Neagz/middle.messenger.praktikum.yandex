@@ -1,25 +1,45 @@
-export { default as TestPage } from './test_page.hbs?raw';
+import { Block } from '../../core/block';
+import { TestButton } from '../../components/test-button/test-button';
+import template from './test_page.hbs?raw';
 
-import './test_page.css';
-import TestButton from "../../components/test-button/test-button";
-import Handlebars from 'handlebars';
+interface TestPageProps {
+    title?: string;
+}
 
-Handlebars.registerPartial('TestButton', (props: any) => {
-    return new TestButton({
-        text: props.text || "Нажми меня",
-        className: props.className || "my-button"
-    }).getContent().outerHTML;
-});
+export class TestPage extends Block {
+    constructor(props: TestPageProps = {}) {
+        super({
+            ...props,
+            title: props.title || "Тестовая страница"
+        });
+    }
 
-export function initTestPage() {
-    console.log('Тестовая страница инициализирована');
+    init() {
+        this.children.button1 = new TestButton({
+            text: "Нажми меня",
+            className: "my-button",
+            page: "nav",
+            events: {
+                click: (e: Event) => {
+                    e.preventDefault();
+                    console.log("Клик сработал!");
+                }
+            }
+        });
 
-    // Вешаем обработчик на родительский элемент
-    document.addEventListener('click', (e) => {
-        const target = e.target as HTMLElement;
-        if (target.closest('.my-button')) {
-            console.log("Кнопка нажата через делегирование!", e);
-            alert("Кнопка работает через делегирование!");
-        }
-    });
+        this.children.button2 = new TestButton({
+            text: "Наведи на меня",
+            className: "my-button-two",
+            events: {
+                mouseover: (e: Event) => {
+                    e.preventDefault();
+                    console.log("Наведение сработало!");
+                }
+            }
+        });
+    }
+
+    protected render(): DocumentFragment {
+        return this.compile(template, this.props);
+    }
 }

@@ -7,13 +7,13 @@
                 </div>
 
                 <div class="form-items">
-                    {{> Input label="Логин" name="login" id="login" type="text" }}
-                    {{> Input label="Пароль" name="password" id="password" type="password" errorName="Ошибка" }}
+                    {{{ inputLogin }}}
+                    {{{ inputPassword }}}
                 </div>
 
                 <div class="group-buttons">
-                    {{> Button page="nav" name="Авторизоваться" type="submit" style="primary" }}
-                    {{> Link page="registration" position="center" style="primary" name="Нет аккаунта?" }}
+                    {{{ button }}}
+                    {{{ link }}}
                 </div>
             </form>
         </div>
