@@ -14,7 +14,27 @@
             </div>
         </div>
         <div class="chat__main">
-            {{{ ChatHeader avatar="avatar.png" username="Вадим" showActionDialogUser=showActionDialogUser }}}
+            <div class="chat-header">
+                <div class="chat-header__user">
+                    <div class="chat-header__avatar">
+                        <img src="avatar.png" class="chat-header__avatar-image" alt="Аватар Вадим">
+                    </div>
+                    <div class="chat-header__username">Вадим</div>
+                </div>
+                <div class="chat-header__actions">
+                    <button class="dots-button__settings">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    {{#if showActionDialogUser}}
+                        <div class="chat-header__actions-dialog">
+                            {{{DotsButton icon="add" name="Добавить пользователя"}}}
+                            {{{DotsButton icon="remove" name="Удалить пользователя" className="remove-button"}}}
+                        </div>
+                    {{/if}}
+                </div>
+            </div>
             <div class="chat__messages">
                 <div class="chat__date">19 июня</div>
                 {{{ Dialog type="incoming" Multiple="true" content="Привет! Смотри, тут всплыл интересный кусок лунной космической истории — НАСА в какой-то момент попросила Хассельблад адаптировать модель SWC для полетов на Луну. Сейчас мы все знаем что астронавты летали с моделью 500 EL — и к слову говоря, все тушки этих камер все еще находятся на поверхности Луны, так как астронавты с собой забрали только кассеты с пленкой."
@@ -22,7 +42,19 @@
                 {{{ Dialog type="incoming" Image="true" content="camera.png" time="11:56" }}}
                 {{{ Dialog type="outgoing" Outgoing="true" content="Круто!" time="12:00" }}}
             </div>
-            {{{ ChatBottom showActionDialogMessage=showActionDialogMessage }}}
+            <div class="message-input">
+                <div class="message__actions">
+                    <button class="message-input__attach-btn message-input__attach-icon" aria-label="Прикрепить файл" title="Прикрепить файл">
+
+                    </button>
+                    {{#if showActionDialogMessage}}
+                        {{{ActionDialogMessage}}}
+                    {{/if}}
+                </div>
+                <label for="message" class="visually-hidden"></label>
+                {{{ inputMessage }}}
+                {{{ sendButton }}}
+            </div>
         </div>
 
         {{#if showDialog}}

@@ -1,6 +1,8 @@
 import { Block } from '../../core/block';
 import { TestButton } from '../../components/test-button/test-button';
 import template from './test_page.hbs?raw';
+import {Input, Message} from "../../components";
+import {ValidationRule} from "../../utils/validation.ts";
 
 interface TestPageProps {
     title?: string;
@@ -15,6 +17,25 @@ export class TestPage extends Block {
     }
 
     init() {
+        this.children.inputMessage = new Message({
+            id: 'message',
+            placeholder: 'Сообщение',
+            name: 'message',
+            validateRule: 'message' as ValidationRule, // Добавляем правило валидации
+            errorText: 'Сообщение не должно быть пустым' // Кастомный текст ошибки
+        });
+
+        this.children.inputLogin = new Input({
+            label: 'Логин',
+            name: 'login',
+            id: 'login',
+            type: 'text',
+            autocomplete: 'login',
+            validateRule: 'login' as ValidationRule,
+            errorText: 'Неверный логин'
+        });
+
+
         this.children.button1 = new TestButton({
             text: "Нажми меня",
             className: "my-button",

@@ -1,11 +1,6 @@
 import { Block } from '../../core/block';
 import template from './list.hbs?raw';
-import { Link } from '../../components/link/link';
-import { ChatHeader } from '../../components/chat-header/chat-header';
-import { Dialog } from '../../components/dialog/dialog';
-import { ChatBottom } from '../../components/chat-bottom/chat-bottom.ts';
-import { RemoveDialog } from '../../components/remove-dialog/remove-dialog';
-import { Input } from "../../components";
+import { ButtonCallback, Input, Message, Link, Dialog, RemoveDialog } from "../../components";
 import { ValidationRule } from "../../utils/validation.ts";
 
 export class ListPage extends Block {
@@ -38,22 +33,6 @@ export class ListPage extends Block {
             contacts: this.props.contacts || []
         });
 
-        this.children.chatHeader = new ChatHeader({
-            avatar: 'avatar.png',
-            username: 'Вадим',
-            showActionDialogUser: this.props.showActionDialogUser,
-            events: {
-                click: (e: Event) => {
-                    const target = e.target as HTMLElement;
-                    if (target.closest('.dots-button__settings')) {
-                        this.toggleActions(e, 'User');
-                    } else if (target.closest('.remove-button')) {
-                        this.props.openRemoveDialog();
-                    }
-                }
-            }
-        });
-
         this.children.dialogIncoming1 = new Dialog({
             type: 'incoming',
             content: 'Привет! Смотри, тут всплыл интересный кусок лунной космической истории — НАСА в какой-то момент попросила Хассельблад адаптировать модель SWC для полетов на Луну. Сейчас мы все знаем что астронавты летали с моделью 500 EL — и к слову говоря, все тушки этих камер все еще находятся на поверхности Луны, так как астронавты с собой забрали только кассеты с пленкой.',
@@ -79,10 +58,40 @@ export class ListPage extends Block {
             time: '12:00'
         });
 
-        this.children.chatBottom = new ChatBottom({
-            showActionDialogMessage: this.props.showActionDialogMessage,
-            onSend: (message: string) => {
-                console.log("Кнопка нажата", message);
+        this.children.inputMessage = new Message({
+            id: 'message',
+            placeholder: 'Сообщение',
+            name: 'message',
+            validateRule: 'message' as ValidationRule, // Добавляем правило валидации
+            errorText: 'Сообщение не должно быть пустым' // Кастомный текст ошибки
+        });
+
+        this.children.sendButton = new ButtonCallback({
+            class: 'message-input__send-btn',
+            title: 'Отправить',
+            type: 'button',
+            content: `
+                <span class="message-input__send-icon">
+                    <span class="message-input__send-icon-line-1"></span>
+                    <span class="message-input__send-icon-line-2"></span>
+                    <span class="message-input__send-icon-line-3"></span>
+                </span>
+            `,
+            events: {
+                click: (e: Event) => {
+                    console.log("Кнопка отправки нажата");
+                    e.preventDefault();
+                    const messageComponent = this.children.inputMessage as Message;
+
+                    // Проверяем валидность
+                    const isValid = messageComponent.validate();
+
+                    if (isValid) {
+                        const message = messageComponent.getValue();
+                        this.props.onSend?.(message);
+                        messageComponent.setValue("");
+                    }
+                }
             }
         });
 
@@ -91,26 +100,6 @@ export class ListPage extends Block {
             title: 'Удалить пользователя',
         });
     }
-
-    toggleActions(e: Event, type: string) {
-        e.stopPropagation();
-        this.setProps({
-            [`showActionDialog${type}`]: !this.props[`showActionDialog${type}`]
-        });
-    }
-
-    protected componentDidUpdate(): boolean {
-        (this.children.chatHeader as Block).setProps({
-            showActionDialogUser: this.props.showActionDialogUser
-        });
-
-        (this.children.message as Block).setProps({
-            showActionDialogMessage: this.props.showActionDialogMessage
-        });
-
-        return true;
-    }
-
     protected render(): DocumentFragment {
         return this.compile(template, this.props);
     }

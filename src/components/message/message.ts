@@ -55,12 +55,11 @@ export class Message extends Block {
 
     validate(): boolean {
         if (!this.props.validateRule) return true;
-
         const rule = validationRules[this.props.validateRule as ValidationRule];
         const isValid = rule(this.currentValue);
 
         if (!isValid) {
-            const errorMessage = this.props.errorText || 'Неверное значение';
+            const errorMessage = this.props.errorText;
             this.setProps({
                 error: errorMessage,
                 class: 'message--error'

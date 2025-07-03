@@ -1,5 +1,11 @@
-<input id="{{id}}" class="message {{class}}" placeholder="{{placeholder}}" autocomplete="off" name="{{name}}" value="{{value}}">
+<input id="{{id}}" class="message {{class}}"
+{{#if error}}
+    placeholder="{{errorText}}"
+{{else}}
+    placeholder="{{placeholder}}"
+{{/if}}
+       autocomplete="off" name="{{name}}" value="{{value}}">
 
 {{#if error}}
-    <div class="message-input__error">{{error}}</div>
+    <div class="{{error}}"></div>
 {{/if}}

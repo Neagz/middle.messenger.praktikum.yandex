@@ -7,9 +7,7 @@ export { ButtonCallback } from './button-callback/button-callback'
 
 // Компоненты чата
 export { ContactItem } from './contact-item/contact-item';
-export { ChatHeader } from './chat-header/chat-header';
 export { Dialog } from './dialog/dialog';
-export { ChatBottom } from './chat-bottom/chat-bottom';
 export { Message } from './message/message';
 
 // Диалоговые компоненты

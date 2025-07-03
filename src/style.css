@@ -437,6 +437,7 @@ footer {
 
 .chat-header__avatar {
   padding-right: 10px;
+  height: 34px;
 }
 
 .contact-item__avatar-image {
@@ -466,7 +467,7 @@ footer {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--color-divider);
-  padding-bottom: 12px;
+  padding-bottom: 10px;
   position: relative;
 }
 
@@ -741,7 +742,6 @@ footer {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0 10px 0 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -849,6 +849,7 @@ footer {
 
 .message__actions {
   position: relative;
+  margin-right: 5px;
 }
 
 .message__actions-dialog {
@@ -919,17 +920,5 @@ footer {
 }
 
 .message--error {
-  border: 1px solid var(--color-danger);
-}
-
-.message-input__error {
-  position: absolute;
-  bottom: -18px;
-  left: 20px;
-  font-size: 10px;
-  color: var(--color-danger);
-  background: white;
-  padding: 2px 5px;
-  border-radius: 3px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  outline: 1px solid var(--color-danger);
 }

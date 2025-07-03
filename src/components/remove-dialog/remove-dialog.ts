@@ -21,6 +21,7 @@ export class RemoveDialog extends Block {
             id: "login",
             type: "text",
             modifier: "remove-dialog",
+            autocomplete: 'off',
             placeholder: "neagz"
         });
 
@@ -31,7 +32,7 @@ export class RemoveDialog extends Block {
             events: {
                 click: (e: Event) => {
                     e.preventDefault();
-                    console.log("Клик сработал!");
+                    console.log("Кнопка 'Удалить' нажата!");
                 }
             }
         });

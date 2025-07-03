@@ -4,6 +4,8 @@ import { Input } from '../../components/input/input';
 import { Button } from '../../components/button/button';
 import { Link } from '../../components/link/link';
 import { ValidationRule, validationRules } from '../../utils/validation';
+//import HTTPTransport from '../../core/httpTransport';
+//const authAPI = new HTTPTransport('/auth');
 
 export class LoginPage extends Block {
     constructor() {
