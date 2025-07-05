@@ -7,11 +7,11 @@
     "start": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint:js": "eslint src/**/*.ts",
-    "lint:fix-js": "eslint --fix src/**/*.ts",
+    "lint:ts": "eslint src/**/*.ts",
+    "lint:fix-ts": "eslint --fix src/**/*.ts",
     "lint:css": "stylelint src/**/*.css src/**/*.scss",
     "lint:fix-css": "stylelint --fix src/**/*.css src/**/*.scss",
-    "lint": "npm run lint:js && npm run lint:css"
+    "lint": "npm run lint:ts && npm run lint:css"
   },
   "engines": {
     "node": "23.8.0"

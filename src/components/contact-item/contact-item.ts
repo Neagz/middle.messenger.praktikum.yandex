@@ -10,7 +10,7 @@ interface ContactItemProps {
     fromMe?: boolean;
     active?: boolean;
     events?: {
-        click: (e: Event) => void;
+        click: (_e: Event) => void;
     };
 }
 

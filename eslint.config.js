@@ -1,21 +1,44 @@
 import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import { defineConfig } from "eslint/config";
+import eslintPluginReact from "eslint-plugin-react";
 
+export default [
+  // Базовые правила ESLint
+  js.configs.recommended,
 
-export default defineConfig([
+  // Поддержка TypeScript
+  ...tseslint.configs.recommended,
+
+  // Поддержка React
   {
-    "extends": "airbnb",
-    "parser": "@typescript-eslint/parser",
-    "plugins": ["@typescript-eslint"],
-    "rules": {
-      "no-unused-vars": 2,
-      "max-len": [1, 100],
-      "max-params": [2, 3]
+    plugins: {
+      react: eslintPluginReact
+    },
+    rules: {
+      ...eslintPluginReact.configs.recommended.rules,
+      "react/react-in-jsx-scope": "off",
+      "react/jsx-filename-extension": [1, { "extensions": [".tsx"] }]
     }
   },
-  { files: ["**/*.{js,mjs,cjs,ts}"], plugins: { js }, extends: ["js/recommended"] },
-  { files: ["**/*.{js,mjs,cjs,ts}"], languageOptions: { globals: globals.browser } },
-  tseslint.configs.recommended,
-]);
+
+  // Кастомные правила
+  {
+    rules: {
+      "no-unused-vars": "error",
+      "max-len": ["warn", 100],
+      "max-params": ["error", 3],
+      "import/prefer-default-export": "off"
+    }
+  },
+
+  // Глобальные переменные
+  {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node
+      }
+    }
+  }
+];

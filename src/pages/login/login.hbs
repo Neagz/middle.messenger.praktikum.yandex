@@ -1,14 +1,26 @@
 <main class="page">
     <div class="center">
         <div class="box box__shadow">
-            <form action="#" id="login-form">
+            <form action="#" id="login-form" >
                 <div class="box__title box__title_main">
                     Вход
                 </div>
 
                 <div class="form-items">
-                    {{{ inputLogin }}}
-                    {{{ inputPassword }}}
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idLogin}}">{{labelLogin}}</label>
+                        {{{ inputLogin }}}
+                        {{#if errors.login}}
+                            <div class="form-item__error">{{errors.login}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idPassword}}">{{labelPassword}}</label>
+                        {{{ inputPassword }}}
+                        {{#if errors.password}}
+                            <div class="form-item__error">{{errors.password}}</div>
+                        {{/if}}
+                    </div>
                 </div>
 
                 <div class="group-buttons">

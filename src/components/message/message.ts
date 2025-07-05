@@ -20,7 +20,10 @@ export class Message extends Block {
         super({
             ...props,
             // Отключаем перерисовку при изменении value
-            shouldUpdate: (oldProps: any, newProps: any) => {
+            shouldUpdate: (
+                oldProps: Record<string, unknown>,
+                newProps: Record<string, unknown>
+            ) => {
                 return oldProps.error !== newProps.error ||
                     oldProps.class !== newProps.class;
             }

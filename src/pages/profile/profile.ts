@@ -3,14 +3,36 @@ import template from './profile.hbs?raw';
 import { Input } from '../../components/input/input';
 import { Link } from '../../components/link/link';
 
+interface ProfileProps {
+    title?: string;
+    label?: string;
+    id?: string;
+    name?: string;
+    errors?: Record<string, string>;
+}
 export class ProfilePage extends Block {
-    constructor() {
-        super();
+    constructor(props: ProfileProps = {}) {
+        super({
+            ...props,
+            errors: {},
+            labelEmail: "Почта",
+            labelLogin: "Логин",
+            labelFirstName: "Имя",
+            labelSecondName: "Фамилия",
+            labelDisplayName: "Имя в чате",
+            labelPhone: "Телефон",
+            idEmail: "email",
+            idLogin: "login",
+            idFirstName: "firstName",
+            idSecondName: "secondName",
+            idDisplayName: "displayName",
+            idPhone: "phone",
+        });
     }
 
     init() {
+
         this.children.inputEmail = new Input({
-            label: 'Почта',
             name: 'email',
             id: 'email',
             type: 'email',
@@ -21,7 +43,6 @@ export class ProfilePage extends Block {
         });
 
         this.children.inputLogin = new Input({
-            label: 'Логин',
             name: 'login',
             id: 'login',
             type: 'text',
@@ -32,9 +53,8 @@ export class ProfilePage extends Block {
         });
 
         this.children.inputFirstName = new Input({
-            label: 'Имя',
-            name: 'first_name',
-            id: 'first_name',
+            name: 'firstName',
+            id: 'firstName',
             type: 'text',
             value: 'Андрей',
             placeholder: 'Андрей',
@@ -43,9 +63,8 @@ export class ProfilePage extends Block {
         });
 
         this.children.inputSecondName = new Input({
-            label: 'Фамилия',
-            name: 'second_name',
-            id: 'second_name',
+            name: 'secondName',
+            id: 'secondName',
             type: 'text',
             value: 'Быстров',
             placeholder: 'Быстров',
@@ -54,9 +73,8 @@ export class ProfilePage extends Block {
         });
 
         this.children.inputDisplayName = new Input({
-            label: 'Имя в чате',
-            name: 'display_name',
-            id: 'display_name',
+            name: 'displayName',
+            id: 'displayName',
             type: 'text',
             value: 'Андрей Б.',
             placeholder: 'Андрей Б.',
@@ -65,7 +83,6 @@ export class ProfilePage extends Block {
         });
 
         this.children.inputPhone = new Input({
-            label: 'Телефон',
             name: 'phone',
             id: 'phone',
             type: 'text',
@@ -78,19 +95,19 @@ export class ProfilePage extends Block {
         this.children.linkEdit = new Link({
             page: 'profile_edit',
             position: 'left',
+            type: 'submit',
             style: 'profile_primary',
             name: 'Изменить данные',
             events: {
-                click: () => {
-                    // Получаем значения
-                    const email = (this.children.inputEmail as Input).getValue();
-                    const login = (this.children.inputLogin as Input).getValue();
-                    const first_name = (this.children.inputFirstName as Input).getValue();
-                    const second_name = (this.children.inputSecondName as Input).getValue();
-                    const display_name = (this.children.inputDisplayName as Input).getValue();
-                    const phone = (this.children.inputPhone as Input).getValue();
+                click: (e: Event) => {
+                    e.preventDefault();
+                    const form = document.getElementById('profile-form') as HTMLFormElement;
 
-                    console.log('Form data:', {email, login, first_name, second_name, display_name, phone });
+                    if (form) {
+                        const formData = new FormData(form);
+                        const data = Object.fromEntries(formData.entries());
+                        console.log('Данные формы:', data);
+                    }
                 }
             }
         });
@@ -99,20 +116,7 @@ export class ProfilePage extends Block {
             page: 'profile_password',
             position: 'left',
             style: 'profile_primary',
-            name: 'Изменить пароль',
-            events: {
-                click: () => {
-                    // Получаем значения
-                    const email = (this.children.inputEmail as Input).getValue();
-                    const login = (this.children.inputLogin as Input).getValue();
-                    const first_name = (this.children.inputFirstName as Input).getValue();
-                    const second_name = (this.children.inputSecondName as Input).getValue();
-                    const display_name = (this.children.inputDisplayName as Input).getValue();
-                    const phone = (this.children.inputPhone as Input).getValue();
-
-                    console.log('Form data:', {email, login, first_name, second_name, display_name, phone });
-                }
-            }
+            name: 'Изменить пароль'
         });
 
         this.children.linkLogout = new Link({

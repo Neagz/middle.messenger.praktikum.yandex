@@ -83,7 +83,7 @@ function navigate(page: string) {
 // Инициализация приложения
 function init() {
   const urlParams = new URLSearchParams(window.location.search);
-  const page = urlParams.get('page') || 'test_page'; // Страница из URL или nav
+  const page = urlParams.get('page') || 'nav'; // Страница из URL или nav
   navigate(page);
 }
 

@@ -7,12 +7,30 @@
                 </div>
 
                 <div class="form-items form-items__profile form-items__border-bottom">
-                    {{{ inputEmail }}}
-                    {{{ inputLogin }}}
-                    {{{ inputFirstName }}}
-                    {{{ inputSecondName }}}
-                    {{{ inputDisplayName }}}
-                    {{{ inputPhone }}}
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idEmail}}">{{labelEmail}}</label>
+                        {{{ inputEmail }}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idLogin}}">{{labelLogin}}</label>
+                        {{{ inputLogin }}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idFirstName}}">{{labelFirstName}}</label>
+                        {{{ inputFirstName }}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idSecondName}}">{{labelSecondName}}</label>
+                        {{{ inputSecondName }}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idDisplayName}}">{{labelDisplayName}}</label>
+                        {{{ inputDisplayName }}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idPhone}}">{{labelPhone}}</label>
+                        {{{ inputPhone }}}
+                    </div>
                 </div>
 
                 <div class="group-buttons group-buttons__profile form-items__border-bottom">

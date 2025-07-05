@@ -1,15 +1,6 @@
-<div class="form-item{{class}}">
-    <div class="form-item__group">
-        <label class="form-item__label" for="{{id}}">{{label}}</label>
-        <input class="form-item__input{{class}} form-item__input--{{modifier}}" id="{{id}}" type="{{type}}" placeholder="{{placeholder}}" name="{{name}}" value="{{value}}" autocomplete="{{autocomplete}}"
-
-                {{#if readonly}}
-                    readonly="readonly"
-                {{/if}}
-        >
-    </div>
-
-    {{#if error}}
-        <div class="form-item__error">{{error}}</div>
+<input class="form-item__input{{class}} form-item__input--{{modifier}}" id="{{id}}" type="{{type}}" placeholder="{{placeholder}}" name="{{name}}" value="{{value}}" autocomplete="{{autocomplete}}"
+    {{#if readonly}}
+       readonly="readonly"
     {{/if}}
-</div>
+>
+

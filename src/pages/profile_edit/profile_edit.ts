@@ -4,119 +4,251 @@ import { Input } from '../../components/input/input';
 import { Button } from '../../components/button/button';
 import {ValidationRule, validationRules} from '../../utils/validation';
 
+interface ProfileEditProps {
+    title?: string;
+    label?: string;
+    id?: string;
+    name?: string;
+    errors?: Record<string, string>;
+}
 export class ProfileEditPage extends Block {
-    constructor() {
+    private isSubmitting = false;
+    constructor(props: ProfileEditProps = {} ) {
         super({
-            validate: {
-                name: (value: string) => validationRules.name(value),
-                login: (value: string) => validationRules.login(value),
-                email: (value: string) => validationRules.email(value),
-                password: (value: string) => validationRules.password(value),
-                phone: (value: string) => validationRules.phone(value),
+            ...props,
+            errors: {},
+            labelEmail: "Почта",
+            labelLogin: "Логин",
+            labelFirstName: "Имя",
+            labelSecondName: "Фамилия",
+            labelDisplayName: "Имя в чате",
+            labelPhone: "Телефон",
+            idEmail: "email",
+            idLogin: "login",
+            idFirstName: "firstName",
+            idSecondName: "secondName",
+            idDisplayName: "displayName",
+            idPhone: "phone",
 
+            handleSubmit: (form: HTMLFormElement) => {
+                // Проверяем, не выполняется ли уже отправка
+                if (this.isSubmitting) return;
+                this.isSubmitting = true;
+
+                try {
+                    const formData = new FormData(form);
+                    const data = Object.fromEntries(formData.entries());
+                    const errors: Record<string, string> = {};
+                    let isValid = true;
+
+                    const emailValue = formData.get('email') as string;
+                    if (!validationRules.email(emailValue)) {
+                        errors.email = 'Неверная почта';
+                        isValid = false;
+                    }
+
+                    const loginValue = formData.get('login') as string;
+                    if (!validationRules.login(loginValue)) {
+                        errors.login = 'Неверный логин';
+                        isValid = false;
+                    }
+
+                    const firstNameValue = formData.get('firstName') as string;
+                    if (!validationRules.name(firstNameValue)) {
+                        errors.firstName = 'Неверное Имя';
+                        isValid = false;
+                    }
+
+                    const secondNameValue = formData.get('secondName') as string;
+                    if (!validationRules.name(secondNameValue)) {
+                        errors.secondName = 'Неверная Фамилия';
+                        isValid = false;
+                    }
+
+                    const displayNameValue = formData.get('displayName') as string;
+                    if (!validationRules.message(displayNameValue)) {
+                        errors.displayName = 'Неверное Имя в чате';
+                        isValid = false;
+                    }
+
+                    const phoneValue = formData.get('phone') as string;
+                    if (!validationRules.phone(phoneValue)) {
+                        errors.phone = 'Неверный телефон';
+                        isValid = false;
+                    }
+
+                    // Обновляем состояние ошибок
+                    this.setProps({ errors });
+
+                    // Если все поля валидны - выводим данные в консоль
+                    if (isValid) {
+                        console.log('Данные формы:', data);
+                        window.navigate('profile');
+                    }
+                }
+                finally {
+                    this.isSubmitting = false;
+                }
             },
-            onEditProfile: (e: Event) => {
-                e.preventDefault();
 
-                // Валидируем конкретные поля
-                const isEmailValid = (this.children.inputEmail as Input).validate();
-                const isLoginValid = (this.children.inputLogin as Input).validate();
-                const isFirstNameValid = (this.children.inputFirstName as Input).validate();
-                const isSecondNameValid = (this.children.inputSecondName as Input).validate();
-                const isPhoneValid = (this.children.inputPhone as Input).validate();
-
-                if (isEmailValid && isLoginValid && isFirstNameValid && isSecondNameValid && isPhoneValid) {
-                    // Получаем значения
-                    const email = (this.children.inputEmail as Input).getValue();
-                    const login = (this.children.inputLogin as Input).getValue();
-                    const first_name = (this.children.inputFirstName as Input).getValue();
-                    const second_name = (this.children.inputSecondName as Input).getValue();
-                    const display_name = (this.children.inputDisplayName as Input).getValue();
-                    const phone = (this.children.inputPhone as Input).getValue();
-
-                    console.log('Form data:', {email, login, first_name, second_name, display_name, phone });
-                    window.navigate('profile');
+            handleKeyDown: (e: KeyboardEvent) => {
+                if (e.key === 'Enter') {
+                    const form = (e.target as HTMLElement).closest('form');
+                    if (form) {
+                        this.props.handleSubmit(form);
+                    }
                 }
             }
         });
     }
 
+    handleBlur = (fieldName: string, value: string, rule: ValidationRule | undefined, errorText: string) => {
+        if (!rule) return;
+
+        const isValid = validationRules[rule](value);
+        const error = isValid ? '' : errorText;
+
+        // Откладываем обновление состояния до следующего тика event loop
+        setTimeout(() => {
+            this.setProps({
+                errors: {
+                    ...this.props.errors,
+                    [fieldName]: error
+                }
+            });
+        }, 0);
+    }
+
     init() {
-        // Добавляем обработчик submit к форме
+        // Добавляем обработчики
         this.setProps({
             events: {
-                submit: this.props.onEditProfile
+                submit: (e: Event) => {
+                    e.preventDefault();
+                    this.props.handleSubmit(e.target as HTMLFormElement);
+                },
+                keydown: this.props.handleKeyDown
             }
         });
+
         this.children.inputEmail = new Input({
-            label: 'Почта',
             name: 'email',
             id: 'email',
             type: 'email',
             value: 'neagz@yandex.ru',
             placeholder: 'neagz@yandex.ru',
             autocomplete: 'email',
-            validateRule: 'email' as ValidationRule,
-            errorText: 'Неверная почта'
+            events: {
+                blur: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    this.handleBlur(
+                        target.name,
+                        target.value,
+                        'email' as ValidationRule,
+                        'Неверная почта'
+                    );
+                }
+            }
         });
 
         this.children.inputLogin = new Input({
-            label: 'Логин',
             name: 'login',
             id: 'login',
             type: 'text',
             value: 'neagz',
             placeholder: 'neagz',
             autocomplete: 'login',
-            validateRule: 'login' as ValidationRule,
-            errorText: 'Неверный логин'
+            events: {
+                blur: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    this.handleBlur(
+                        target.name,
+                        target.value,
+                        'login' as ValidationRule,
+                        'Неверный логин'
+                    );
+                }
+            }
         });
 
         this.children.inputFirstName = new Input({
-            label: 'Имя',
-            name: 'first_name',
-            id: 'first_name',
+            name: 'firstName',
+            id: 'firstName',
             type: 'text',
             value: 'Андрей',
             placeholder: 'Андрей',
             autocomplete: 'first_name',
-            validateRule: 'name' as ValidationRule,
-            errorText: 'Неверное имя'
+            events: {
+                blur: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    this.handleBlur(
+                        target.name,
+                        target.value,
+                        'name' as ValidationRule,
+                        'Неверное Имя'
+                    );
+                }
+            }
         });
 
         this.children.inputSecondName = new Input({
-            label: 'Фамилия',
-            name: 'second_name',
-            id: 'second_name',
+            name: 'secondName',
+            id: 'secondName',
             type: 'text',
             value: 'Быстров',
             placeholder: 'Быстров',
             autocomplete: 'family_name',
-            validateRule: 'name' as ValidationRule,
-            errorText: 'Неверная фамилия'
+            events: {
+                blur: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    this.handleBlur(
+                        target.name,
+                        target.value,
+                        'name' as ValidationRule,
+                        'Неверная Фамилия'
+                    );
+                }
+            }
         });
 
         this.children.inputDisplayName = new Input({
-            label: 'Имя в чате',
-            name: 'display_name',
-            id: 'display_name',
+            name: 'displayName',
+            id: 'displayName',
             type: 'text',
             value: 'Андрей Б.',
             placeholder: 'Андрей Б.',
             autocomplete: 'name',
-            validateRule: 'name' as ValidationRule
+            events: {
+                blur: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    this.handleBlur(
+                        target.name,
+                        target.value,
+                        'name' as ValidationRule,
+                        'Неверное Имя в чате'
+                    );
+                }
+            }
         });
 
         this.children.inputPhone = new Input({
-            label: 'Телефон',
             name: 'phone',
             id: 'phone',
             type: 'text',
             value: '+79996680250',
             placeholder: '+7 (999) 668 02 50',
             autocomplete: 'phone',
-            validateRule: 'phone' as ValidationRule,
-            errorText: 'Неверный формат номера телефона, убери пробелы и скобки'
+            events: {
+                blur: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    this.handleBlur(
+                        target.name,
+                        target.value,
+                        'phone' as ValidationRule,
+                        'Неверный телефон'
+                    );
+                }
+            }
         });
 
         this.children.button = new Button({

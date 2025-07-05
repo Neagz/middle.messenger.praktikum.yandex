@@ -4,76 +4,170 @@ import { Input } from '../../components/input/input';
 import { Button } from '../../components/button/button';
 import {ValidationRule, validationRules} from '../../utils/validation';
 
+interface ProfilePasswordProps {
+    title?: string;
+    label?: string;
+    id?: string;
+    name?: string;
+    errors?: Record<string, string>;
+}
 export class ProfilePasswordPage extends Block {
-    constructor() {
+    private isSubmitting = false;
+    constructor(props: ProfilePasswordProps = {}) {
         super({
-            validate: {
-                password: (value: string) => validationRules.password(value),
+            ...props,
+            errors: {},
+            labelOldPassword: "Старый пароль",
+            labelNewPassword: "Новый пароль",
+            labelRepeatPassword: "Повторите новый пароль",
+            idOldPassword: "oldPassword",
+            idNewPassword: "newPassword",
+            idRepeatPassword: "repeatPassword",
 
+            handleSubmit: (form: HTMLFormElement) => {
+                // Проверяем, не выполняется ли уже отправка
+                if (this.isSubmitting) return;
+                this.isSubmitting = true;
+
+                try {
+                    const formData = new FormData(form);
+                    const data = Object.fromEntries(formData.entries());
+                    const errors: Record<string, string> = {};
+                    let isValid = true;
+
+                    const oldPasswordValue = formData.get('oldPassword') as string;
+                    if (!validationRules.password(oldPasswordValue)) {
+                        errors.oldPassword = 'Неверный пароль';
+                        isValid = false;
+                    }
+
+                    const newPasswordValue = formData.get('newPassword') as string;
+                    if (!validationRules.password(newPasswordValue)) {
+                        errors.newPassword = 'Неверный формат пароля';
+                        isValid = false;
+                    }
+
+                    const repeatPasswordValue = formData.get('repeatPassword') as string;
+                    if (!validationRules.password(repeatPasswordValue)) {
+                        errors.repeatPassword = 'Пароли не совпадают';
+                        isValid = false;
+                    }
+
+                    // Обновляем состояние ошибок
+                    this.setProps({ errors });
+
+                    // Если все поля валидны - выводим данные в консоль
+                    if (isValid) {
+                        console.log('Данные формы:', data);
+                        window.navigate('profile');
+                    }
+                }
+                finally {
+                    this.isSubmitting = false;
+                }
             },
-            onProfilePassword: (e: Event) => {
-                e.preventDefault();
 
-                // Валидируем конкретные поля
-                const isOldPasswordValid = (this.children.inputOldPassword as Input).validate();
-                const isNewPasswordValid = (this.children.inputNewPassword as Input).validate();
-                const isRepeatNewPasswordValid = (this.children.inputRepeatPassword as Input).validate();
-
-                if (isOldPasswordValid && isNewPasswordValid && isRepeatNewPasswordValid) {
-                    // Получаем значения
-                    const old_password = (this.children.inputOldPassword as Input).getValue();
-                    const new_password = (this.children.inputNewPassword as Input).getValue();
-                    const repeat_new_password = (this.children.inputRepeatPassword as Input).getValue();
-
-                    console.log('Form data:', {old_password, new_password, repeat_new_password });
-                    window.navigate('profile');
+            handleKeyDown: (e: KeyboardEvent) => {
+                if (e.key === 'Enter') {
+                    const form = (e.target as HTMLElement).closest('form');
+                    if (form) {
+                        this.props.handleSubmit(form);
+                    }
                 }
             }
         });
     }
 
+    handleBlur = (fieldName: string, value: string, rule: ValidationRule | undefined, errorText: string) => {
+        if (!rule) return;
+
+        const isValid = validationRules[rule](value);
+        const error = isValid ? '' : errorText;
+
+        // Откладываем обновление состояния до следующего тика event loop
+        setTimeout(() => {
+            this.setProps({
+                errors: {
+                    ...this.props.errors,
+                    [fieldName]: error
+                }
+            });
+        }, 0);
+    }
+
     init() {
-        // Добавляем обработчик submit к форме
+        // Добавляем обработчики
         this.setProps({
             events: {
-                submit: this.props.onProfilePassword
+                submit: (e: Event) => {
+                    e.preventDefault();
+                    this.props.handleSubmit(e.target as HTMLFormElement);
+                },
+                keydown: this.props.handleKeyDown
             }
         });
 
         this.children.inputOldPassword = new Input({
-            label: 'Старый пароль',
             name: 'oldPassword',
-            id: 'password',
+            id: 'oldPassword',
             type: 'password',
             value: 'Neagz111',
             placeholder: '••••••••',
             autocomplete: 'new-password',
             validateRule: 'password' as ValidationRule,
-            errorText: 'Неверный пароль'
+            events: {
+                blur: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    this.handleBlur(
+                        target.name,
+                        target.value,
+                        'password' as ValidationRule,
+                        'Неверный пароль'
+                    );
+                }
+            }
         });
 
         this.children.inputNewPassword = new Input({
-            label: 'Новый пароль',
             name: 'newPassword',
-            id: 'new-password',
+            id: 'newPassword',
             type: 'password',
             value: 'Neagz1111',
             placeholder: '••••••••••',
             autocomplete: 'new-password',
             validateRule: 'password' as ValidationRule,
-            errorText: 'Неверный формат нового пароля'
+            events: {
+                blur: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    this.handleBlur(
+                        target.name,
+                        target.value,
+                        'password' as ValidationRule,
+                        'Неверный формат пароля'
+                    );
+                }
+            }
         });
 
         this.children.inputRepeatPassword = new Input({
-            label: 'Повторите новый пароль',
-            name: 'repeat_newPassword',
-            id: 'repeat_new-password',
+            name: 'repeatPassword',
+            id: 'repeatPassword',
             type: 'password',
             value: 'Neagz1111',
             placeholder: '••••••••••',
             autocomplete: 'new-password',
             validateRule: 'password' as ValidationRule,
-            errorText: 'Пароли не совпадают'
+            events: {
+                blur: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    this.handleBlur(
+                        target.name,
+                        target.value,
+                        'password' as ValidationRule,
+                        'Пароли не совпадают'
+                    );
+                }
+            }
         });
 
         this.children.button = new Button({

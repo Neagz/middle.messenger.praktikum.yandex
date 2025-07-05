@@ -6,8 +6,8 @@ interface TestButtonProps {
     page?: string;
     className?: string;
     events?: {
-        click?: (e: Event) => void;
-        mouseover?: (e: Event) => void;
+        click?: (_e: Event) => void;
+        mouseover?: (_e: Event) => void;
     };
 }
 

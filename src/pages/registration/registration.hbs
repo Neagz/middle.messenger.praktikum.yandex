@@ -7,13 +7,55 @@
                 </div>
 
                 <div class="form-items">
-                    {{{ inputEmail }}}
-                    {{{ inputLogin }}}
-                    {{{ inputFirstName }}}
-                    {{{ inputSecondName }}}
-                    {{{ inputPhone }}}
-                    {{{ inputPassword }}}
-                    {{{ inputConfirmPassword }}}
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idEmail}}">{{labelEmail}}</label>
+                        {{{ inputEmail }}}
+                        {{#if errors.email}}
+                            <div class="form-item__error">{{errors.email}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idLogin}}">{{labelLogin}}</label>
+                        {{{ inputLogin }}}
+                        {{#if errors.login}}
+                            <div class="form-item__error">{{errors.login}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idFirstName}}">{{labelFirstName}}</label>
+                        {{{ inputFirstName }}}
+                        {{#if errors.firstName}}
+                            <div class="form-item__error">{{errors.firstName}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idSecondName}}">{{labelSecondName}}</label>
+                        {{{ inputSecondName }}}
+                        {{#if errors.secondName}}
+                            <div class="form-item__error">{{errors.secondName}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idPhone}}">{{labelPhone}}</label>
+                        {{{ inputPhone }}}
+                        {{#if errors.phone}}
+                            <div class="form-item__error">{{errors.phone}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idPassword}}">{{labelPassword}}</label>
+                        {{{ inputPassword }}}
+                        {{#if errors.password}}
+                            <div class="form-item__error">{{errors.password}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idConfirmPassword}}">{{labelConfirmPassword}}</label>
+                        {{{ inputConfirmPassword }}}
+                        {{#if errors.confirmPassword}}
+                            <div class="form-item__error">{{errors.confirmPassword}}</div>
+                        {{/if}}
+                    </div>
                 </div>
 
                 <div class="group-buttons">

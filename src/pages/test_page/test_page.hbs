@@ -8,7 +8,24 @@
 
                 <div class="group-buttons">
                     {{{ inputMessage }}}
-                    {{{ inputLogin }}}
+                    <div class="form-item{{class}}">
+                        <div class="form-item__group">
+                            <label class="form-item__label" for="{{id}}">{{label}}</label>
+                            {{{ inputLogin }}}
+                            {{#if errors.login}}
+                                <div class="form-item__error">{{errors.login}}</div>
+                            {{/if}}
+                        </div>
+                    </div>
+                    <div class="form-item{{class}}">
+                        <div class="form-item__group">
+                            <label class="form-item__label" for="{{id2}}">{{label2}}</label>
+                            {{{ inputPassword }}}
+                            {{#if errors.password}}
+                                <div class="form-item__error">{{errors.password}}</div>
+                            {{/if}}
+                        </div>
+                    </div>
                     {{{ button1 }}}
                     {{{ button2 }}}
                 </div>

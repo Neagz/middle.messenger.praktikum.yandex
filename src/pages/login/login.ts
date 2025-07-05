@@ -4,61 +4,146 @@ import { Input } from '../../components/input/input';
 import { Button } from '../../components/button/button';
 import { Link } from '../../components/link/link';
 import { ValidationRule, validationRules } from '../../utils/validation';
-//import HTTPTransport from '../../core/httpTransport';
-//const authAPI = new HTTPTransport('/auth');
+
+/**
+import HTTPTransport from '../../core/httpTransport';
+const authAPI = new HTTPTransport('/auth');
+**/
+
+interface LoginProps {
+    title?: string;
+    label?: string;
+    id?: string;
+    name?: string;
+    errors?: Record<string, string>;
+}
 
 export class LoginPage extends Block {
-    constructor() {
+    private isSubmitting = false;
+    constructor(props: LoginProps = {}) {
         super({
-            validate: {
-                login: (value: string) => validationRules.login(value),
-                password: (value: string) => validationRules.password(value),
+            ...props,
+            errors: {},
+            labelLogin: "Логин",
+            idLogin: "login",
+            labelPassword: "Пароль",
+            idPassword: "password",
+
+            handleSubmit: (form: HTMLFormElement) => {
+                // Проверяем, не выполняется ли уже отправка
+                if (this.isSubmitting) return;
+                this.isSubmitting = true;
+
+                try {
+                    const formData = new FormData(form);
+                    const data = Object.fromEntries(formData.entries());
+                    const errors: Record<string, string> = {};
+                    let isValid = true;
+
+                    // Валидация логина
+                    const loginValue = formData.get('login') as string;
+                    if (!validationRules.login(loginValue)) {
+                        errors.login = 'Неверный логин';
+                        isValid = false;
+                    }
+
+                    // Валидация пароля
+                    const passwordValue = formData.get('password') as string;
+                    if (!validationRules.password(passwordValue)) {
+                        errors.password = 'Неверный пароль';
+                        isValid = false;
+                    }
+
+                    // Обновляем состояние ошибок
+                    this.setProps({ errors });
+
+                    // Если все поля валидны - выводим данные в консоль
+                    if (isValid) {
+                        console.log('Данные формы:', data);
+                        window.navigate('list');
+                    }
+                }
+                finally {
+                    this.isSubmitting = false;
+                }
             },
-            onLogin: (e: Event) => {
-                e.preventDefault();
 
-                // Валидируем конкретные поля
-                const isLoginValid = (this.children.inputLogin as Input).validate();
-                const isPasswordValid = (this.children.inputPassword as Input).validate();
-
-                if (isLoginValid && isPasswordValid) {
-                    // Получаем значения
-                    const login = (this.children.inputLogin as Input).getValue();
-                    const password = (this.children.inputPassword as Input).getValue();
-                    console.log('Form data:', { login, password });
-                    window.navigate('list');
+            handleKeyDown: (e: KeyboardEvent) => {
+                if (e.key === 'Enter') {
+                    const form = (e.target as HTMLElement).closest('form');
+                    if (form) {
+                        this.props.handleSubmit(form);
+                    }
                 }
             }
         });
     }
 
+    handleBlur = (fieldName: string, value: string, rule: ValidationRule | undefined, errorText: string) => {
+        if (!rule) return;
+
+        const isValid = validationRules[rule](value);
+        const error = isValid ? '' : errorText;
+
+        // Откладываем обновление состояния до следующего тика event loop
+        setTimeout(() => {
+            this.setProps({
+                errors: {
+                    ...this.props.errors,
+                    [fieldName]: error
+                }
+            });
+        }, 0);
+    }
+
     init() {
-        // Добавляем обработчик submit к форме
+        // Добавляем обработчики
         this.setProps({
             events: {
-                submit: this.props.onLogin
+                submit: (e: Event) => {
+                    e.preventDefault();
+                    this.props.handleSubmit(e.target as HTMLFormElement);
+                },
+                keydown: this.props.handleKeyDown
             }
         });
 
         this.children.inputLogin = new Input({
-            label: 'Логин',
             name: 'login',
             id: 'login',
             type: 'text',
             autocomplete: 'login',
             validateRule: 'login' as ValidationRule,
-            errorText: 'Неверный логин'
+            events: {
+                blur: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    this.handleBlur(
+                        target.name,
+                        target.value,
+                        'login' as ValidationRule,
+                        'Неверный логин'
+                    );
+                }
+            }
         });
 
         this.children.inputPassword = new Input({
-            label: 'Пароль',
             name: 'password',
             id: 'password',
             type: 'password',
-            //error: 'Ошибка',
             autocomplete: 'new-password',
             validateRule: 'password' as ValidationRule,
-            errorText: 'Неверный пароль'
+            events: {
+                blur: (e: Event) => {
+                    const target = e.target as HTMLInputElement;
+                    this.handleBlur(
+                        target.name,
+                        target.value,
+                        'password' as ValidationRule,
+                        'Неверный пароль'
+                    );
+                }
+            }
         });
 
         // Убираем обработчик click с кнопки
@@ -77,6 +162,9 @@ export class LoginPage extends Block {
     }
 
     protected render(): DocumentFragment {
-        return this.compile(template, this.props);
+        return this.compile(template, {
+            ...this.props,
+            errors: this.props.errors || {}
+        });
     }
 }

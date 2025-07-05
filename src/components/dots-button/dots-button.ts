@@ -7,7 +7,7 @@ interface DotsButtonProps {
     className?: string;
     type?: 'button' | 'submit' | 'reset';
     events?: {
-        click: (e: Event) => void;
+        click: (_e: Event) => void;
     };
 }
 

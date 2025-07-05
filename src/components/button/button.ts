@@ -7,7 +7,7 @@ interface ButtonProps {
     page?: string;
     style: string;
     events?: {
-        click: (e: Event) => void;
+        click: (_e: Event) => void;
     };
 }
 

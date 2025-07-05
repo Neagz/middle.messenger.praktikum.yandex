@@ -2,7 +2,7 @@ import EventBus from './eventBus';
 import Handlebars from "handlebars";
 
 // Типы для событий и свойств
-type BlockEvents = { [key: string]: (e: Event) => void };
+type BlockEvents = { [key: string]: (_e: Event) => void };
 type BlockProps = { events?: BlockEvents; [key: string]: any };
 type BlockChildren = Record<string, Block | Block[]>; // Тип для дочерних компонентов
 
@@ -70,55 +70,25 @@ export class Block {
     private _render() {
         const fragment = this.render();
         const newElement = fragment.firstElementChild as HTMLElement;
-        // Сохраняем активный элемент
+
+        // Сохраняем текущий активный элемент
         const activeElement = document.activeElement as HTMLElement;
-        const isFocused = this._element?.contains(activeElement);
+        const activeElementId = activeElement?.id;
 
-        // Сохраняем состояние всех полей ввода в компоненте
-        const inputStates: Record<string, { value: string; selectionStart: number | null; selectionEnd: number | null }> = {};
-
-        if (this._element) {
-            // Собираем данные со всех input и textarea
-            const inputs = this._element.querySelectorAll('input, textarea');
-            inputs.forEach(input => {
-                const el = input as HTMLInputElement | HTMLTextAreaElement;
-                inputStates[el.name || el.id] = {
-                    value: el.value,
-                    selectionStart: el.selectionStart,
-                    selectionEnd: el.selectionEnd
-                };
-            });
-
+        if (this._element && this._element.parentNode) {
             this._element.replaceWith(newElement);
-        }
-        // Восстанавливаем фокус
-        if (isFocused && activeElement.tagName === 'INPUT') {
-            const newInput = this._element?.querySelector<HTMLInputElement>(
-                `input[name="${(activeElement as HTMLInputElement).name}"]`
-            );
-            newInput?.focus();
         }
 
         this._element = newElement;
         this._addEvents();
 
-        // Восстанавливаем состояние полей
-        Object.entries(inputStates).forEach(([name, state]) => {
-            const element = this._element?.querySelector<HTMLInputElement | HTMLTextAreaElement>(
-                `input[name="${name}"], textarea[name="${name}"], input#${name}, textarea#${name}`
-            );
-
-            if (element) {
-                element.value = state.value;
-
-                // Восстанавливаем позицию курсора только для активного поля
-                if (element === document.activeElement) {
-                    if (state.selectionStart !== null && state.selectionEnd !== null) {
-                        element.setSelectionRange(state.selectionStart, state.selectionEnd);
-                    }
-                }
+        // Восстанавливаем фокус
+        if (activeElementId) {
+            const newActiveElement = this._element.querySelector(`#${activeElementId}`);
+            if (newActiveElement) {
+                (newActiveElement as HTMLElement).focus();
             }
-        });
+        }
     }
 
     protected render(): DocumentFragment {
