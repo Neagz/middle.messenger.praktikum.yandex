@@ -16,7 +16,6 @@ export class RemoveDialog extends Block {
 
     init() {
         this.children.input = new Input({
-            label: "Логин",
             name: "login",
             id: "login",
             type: "text",

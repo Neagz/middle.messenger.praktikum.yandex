@@ -20,7 +20,6 @@ export class ListPage extends Block {
 
         this.children.inputSearch = new Input({
             class: '--search',
-            label: '',
             name: 'search',
             id: 'search',
             type: 'text',
