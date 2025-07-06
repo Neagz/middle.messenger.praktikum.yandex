@@ -39,7 +39,6 @@
     "vite": "^6.2.0"
   },
   "dependencies": {
-    "@types/handlebars": "^4.0.40",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "vite-plugin-handlebars": "^2.0.0"

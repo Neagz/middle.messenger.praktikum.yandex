@@ -1,7 +1,7 @@
 import { Block } from '../../core/block';
 import template from './list.hbs?raw';
 import { ButtonCallback, Input, Message, Link, Dialog, RemoveDialog } from "../../components";
-import { ValidationRule } from "../../utils/validation.ts";
+import { ValidationRule } from "../../utils/validation";
 
 interface ListPageProps {
     contacts?: unknown[];

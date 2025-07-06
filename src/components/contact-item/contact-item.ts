@@ -12,6 +12,7 @@ interface ContactItemProps {
     events?: {
         click: (_e: Event) => void;
     };
+    [key: string]: unknown;
 }
 
 export class ContactItem extends Block {

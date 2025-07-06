@@ -9,6 +9,7 @@ interface DialogProps {
     Multiple?: boolean;
     Outgoing?: boolean;
     contentTwo?: string;
+    [key: string]: unknown;
 }
 
 export class Dialog extends Block {

@@ -1,6 +1,6 @@
 import { Block } from '../../core/block';
 import template from './message.hbs?raw';
-import {ValidationRule, validationRules} from "../../utils/validation.ts";
+import {ValidationRule, validationRules} from "../../utils/validation";
 
 interface MessageProps {
     id: string;
