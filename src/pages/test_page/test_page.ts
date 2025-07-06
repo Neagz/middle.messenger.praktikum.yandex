@@ -2,7 +2,7 @@ import { Block } from '../../core/block';
 import { TestButton } from '../../components/test-button/test-button';
 import template from './test_page.hbs?raw';
 import { Input, Message } from "../../components";
-import { ValidationRule, validationRules } from "../../utils/validation.ts";
+import { ValidationRule, validationRules } from "../../utils/validation";
 
 interface TestPageProps {
     title?: string;
