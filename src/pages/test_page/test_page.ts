@@ -10,13 +10,16 @@ interface TestPageProps {
     id?: string;
     name?: string;
     errors?: Record<string, string>;
+    label2?: string;
+    id2?: string;
+    [key: string]: unknown;
 }
 
-export class TestPage extends Block {
+export class TestPage extends Block<TestPageProps> {
     constructor(props: TestPageProps = {}) {
         super({
             ...props,
-            errors: {}, // Инициализация состояния ошибок
+            errors: {},
             title: "Тестовая страница",
             label: "Логин",
             id: "username",
@@ -25,7 +28,6 @@ export class TestPage extends Block {
         });
     }
 
-    // Обработчик события blur для валидации
     handleBlur = (fieldName: string, value: string, rule: ValidationRule | undefined, errorText: string) => {
         if (!rule) return;
 
@@ -45,8 +47,8 @@ export class TestPage extends Block {
             id: 'message',
             placeholder: 'Сообщение',
             name: 'message',
-            validateRule: 'message' as ValidationRule, // Добавляем правило валидации
-            errorText: 'Сообщение не должно быть пустым' // Кастомный текст ошибки
+            validateRule: 'message' as ValidationRule,
+            errorText: 'Сообщение не должно быть пустым'
         });
 
         this.children.inputLogin = new Input({

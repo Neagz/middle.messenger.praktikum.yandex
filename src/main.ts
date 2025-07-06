@@ -4,10 +4,14 @@ import * as Pages from './pages'; // Страницы
 import * as Components from './components'; // Компоненты
 import { Block } from "./core/block"; // Базовый класс
 
+interface HelperContext {
+  name: string;
+  value: number;
+}
 // Тип для конфигурации страницы
 type PageConfig = {
-  template: typeof Block; // Конструктор страницы
-  context?: Record<string, any>; // Данные для страницы
+  template: new (_props: Record<string, unknown>) => Block; // Упрощенный тип конструктора
+  context?: Record<string, unknown>;
 };
 
 // Конфигурация страниц
@@ -15,7 +19,7 @@ const pagesConfig: Record<string, PageConfig> = {
   test_page: { template: Pages.TestPage },
   login: { template: Pages.LoginPage },
   registration: { template: Pages.RegistrationPage },
-  nav: { template: Pages.NavigatePage }, // Страница с ошибкой partial
+  nav: { template: Pages.NavigatePage },
   '500': { template: Pages.Page500 },
   '404': { template: Pages.Page404 },
   profile: { template: Pages.ProfilePage },
@@ -44,7 +48,7 @@ const pagesConfig: Record<string, PageConfig> = {
 
 // Улучшенная регистрация хелперов с поддержкой вложенного контента
 Object.entries(Components).forEach(([componentName, ComponentClass]) => {
-  Handlebars.registerHelper(componentName, function (this: any, ...args: any[]) {
+  Handlebars.registerHelper(componentName, function (this: HelperContext, ...args: unknown[]) {
     const options = args.pop() as Handlebars.HelperOptions;
     const context = this || {};
     const props = { ...context, ...options.hash };
@@ -54,7 +58,7 @@ Object.entries(Components).forEach(([componentName, ComponentClass]) => {
       props.content = options.fn(this);
     }
 
-    const instance = new (ComponentClass as any)(props);
+    const instance = new (ComponentClass)(props);
     return new Handlebars.SafeString(instance.getContent()?.outerHTML || '');
   });
 });
@@ -102,5 +106,5 @@ document.addEventListener('click', (e) => {
 document.addEventListener('DOMContentLoaded', init);
 
 // Экспорт навигации в глобальную область
-declare global { interface Window { navigate: (page: string) => void; } }
+declare global { interface Window { navigate: (_page: string) => void; } }
 window.navigate = navigate;

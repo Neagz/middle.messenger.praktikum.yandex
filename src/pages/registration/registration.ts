@@ -5,16 +5,34 @@ import { Button } from '../../components/button/button';
 import { Link } from '../../components/link/link';
 import {ValidationRule, validationRules} from '../../utils/validation';
 
-interface RegistrationProps {
+interface RegistrationPageProps {
     title?: string;
     label?: string;
     id?: string;
     name?: string;
     errors?: Record<string, string>;
+    labelEmail?: string;
+    labelLogin?: string;
+    labelFirstName?: string;
+    labelSecondName?: string;
+    labelPhone?: string;
+    labelPassword?: string;
+    labelConfirmPassword?: string;
+    idEmail?: string;
+    idLogin?: string;
+    idFirstName?: string;
+    idSecondName?: string;
+    idPhone?: string;
+    idPassword?: string;
+    idConfirmPassword?: string;
+    handleSubmit?: (_form: HTMLFormElement) => void;
+    handleKeyDown?: (_e: KeyboardEvent) => void;
+    [key: string]: unknown;
 }
-export class RegistrationPage extends Block {
+
+export class RegistrationPage extends Block<RegistrationPageProps> {
     private isSubmitting = false;
-    constructor(props: RegistrationProps = {}) {
+    constructor(props: RegistrationPageProps = {}) {
         super({
             ...props,
             errors: {},
@@ -34,7 +52,6 @@ export class RegistrationPage extends Block {
             idConfirmPassword: "confirmPassword",
 
             handleSubmit: (form: HTMLFormElement) => {
-                // Проверяем, не выполняется ли уже отправка
                 if (this.isSubmitting) return;
                 this.isSubmitting = true;
 
@@ -86,10 +103,8 @@ export class RegistrationPage extends Block {
                         isValid = false;
                     }
 
-                    // Обновляем состояние ошибок
                     this.setProps({ errors });
 
-                    // Если все поля валидны - выводим данные в консоль
                     if (isValid) {
                         console.log('Данные формы:', data);
                         window.navigate('list');
@@ -104,7 +119,7 @@ export class RegistrationPage extends Block {
                 if (e.key === 'Enter') {
                     const form = (e.target as HTMLElement).closest('form');
                     if (form) {
-                        this.props.handleSubmit(form);
+                        this.props.handleSubmit?.(form);
                     }
                 }
             }
@@ -117,7 +132,6 @@ export class RegistrationPage extends Block {
         const isValid = validationRules[rule](value);
         const error = isValid ? '' : errorText;
 
-        // Откладываем обновление состояния до следующего тика event loop
         setTimeout(() => {
             this.setProps({
                 errors: {
@@ -129,14 +143,17 @@ export class RegistrationPage extends Block {
     }
 
     init() {
-        // Добавляем обработчики
+        const keydownHandler = this.props.handleKeyDown
+            ? (e: Event) => this.props.handleKeyDown!(e as KeyboardEvent)
+            : undefined;
+
         this.setProps({
             events: {
                 submit: (e: Event) => {
                     e.preventDefault();
-                    this.props.handleSubmit(e.target as HTMLFormElement);
+                    this.props.handleSubmit?.(e.target as HTMLFormElement);
                 },
-                keydown: this.props.handleKeyDown
+                keydown: keydownHandler
             }
         });
 

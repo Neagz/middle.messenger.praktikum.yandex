@@ -13,7 +13,7 @@
 }
 
 @font-face {
-  font-family: 'Inter';
+  font-family: Inter;
   src: url('../fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('ttf'),
   url('../fonts/Inter-VariableFont_opsz,wght.ttf') format('ttf');
   font-weight: 400;
@@ -24,7 +24,7 @@
 html, body, #app {
   height: 100%;
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 #app {
@@ -45,7 +45,6 @@ input:focus::placeholder {
 
 div {
   box-sizing: border-box;
-
 }
 
 main {
@@ -86,7 +85,7 @@ footer {
 }
 
 .box__shadow {
-  box-shadow: 0 0 6px rgb(0 0 0 / 14%);
+  box-shadow: 0 0 6px rgb(0 0 0 / 10%);
 }
 
 .box__title {
@@ -514,7 +513,7 @@ footer {
   border-radius: 13px;
   padding: 11px;
   margin-bottom: 16px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
   max-width: 402px;
   position: relative;
   word-wrap: break-word;
@@ -523,7 +522,7 @@ footer {
 
 .chat__date {
   text-align: center;
-  margin: 48px 0 30px 0;
+  margin: 48px 0 30px;
   position: relative;
   color: var(--color-text-muted);
   font-size: 12px;
@@ -620,7 +619,7 @@ footer {
   color: var(--color-bg-primary);
   font-size: 9px;
   text-align: right;
-  background-color: rgba(81, 81, 81, 0.5);
+  background-color: rgb(81 81 81 / 50%);
   width: 37px;
   height: 13px;
   border-radius: 30px;
@@ -665,7 +664,7 @@ footer {
 
 .message-input {
   border-top: 1px solid var(--color-divider);
-  padding: 11px 0 1px 0;
+  padding: 11px 0 1px;
   display: flex;
   margin-top: auto;
   align-items: center;
@@ -745,7 +744,6 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-
 }
 
 .message-input__attach-icon {
@@ -756,7 +754,7 @@ footer {
 }
 
 .dialog-container{
-  background-color: rgba(0, 0, 0, .7);
+  background-color: rgb(0 0 0 / 70%);
   height: 100%;
   width: 100%;
   position: fixed;
@@ -802,8 +800,8 @@ footer {
   width: 210px;
   background: var(--color-bg-primary);
   border-radius: 12px;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.14);
-  padding: 15px 15px;
+  box-shadow: 0 0 6px rgb(0 0 0 / 14%);
+  padding: 15px;
   top: calc(100% + 29px);
   display: flex;
   flex-direction: column;
@@ -857,8 +855,8 @@ footer {
   width: 162px;
   border-radius: 12px;
   background: var(--color-bg-primary);
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.14);
-  padding: 15px 15px;
+  box-shadow: 0 0 6px rgb(0 0 0 / 14%);
+  padding: 15px;
   bottom: calc(100% + 32px);
   display: flex;
   flex-direction: column;
@@ -910,12 +908,12 @@ footer {
 }
 
 .my-button {
-  background: #3369F3;
+  background: var(--color-border-focus);
   color: white;
 }
 
 .my-button-two {
-  background: #f33333;
+  background: var(--color-danger-light);
   color: white;
 }
 

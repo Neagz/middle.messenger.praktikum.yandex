@@ -1,26 +1,26 @@
-import { Block } from '../../core/block';
+import { Block, BaseBlockProps } from '../../core/block';
 import template from './login.hbs?raw';
 import { Input } from '../../components/input/input';
 import { Button } from '../../components/button/button';
 import { Link } from '../../components/link/link';
 import { ValidationRule, validationRules } from '../../utils/validation';
 
-/**
-import HTTPTransport from '../../core/httpTransport';
-const authAPI = new HTTPTransport('/auth');
-**/
-
-interface LoginProps {
+// Расширяем базовые пропсы специфичными для страницы
+interface LoginPageProps extends BaseBlockProps {
     title?: string;
-    label?: string;
-    id?: string;
-    name?: string;
     errors?: Record<string, string>;
+    labelLogin?: string;
+    labelPassword?: string;
+    idLogin?: string;
+    idPassword?: string;
+    handleSubmit?: (_form: HTMLFormElement) => void;
+    handleKeyDown?: (_e: KeyboardEvent) => void;
 }
 
-export class LoginPage extends Block {
+export class LoginPage extends Block<LoginPageProps> {
     private isSubmitting = false;
-    constructor(props: LoginProps = {}) {
+
+    constructor(props: LoginPageProps = {}) {
         super({
             ...props,
             errors: {},
@@ -28,9 +28,7 @@ export class LoginPage extends Block {
             idLogin: "login",
             labelPassword: "Пароль",
             idPassword: "password",
-
             handleSubmit: (form: HTMLFormElement) => {
-                // Проверяем, не выполняется ли уже отправка
                 if (this.isSubmitting) return;
                 this.isSubmitting = true;
 
@@ -40,39 +38,33 @@ export class LoginPage extends Block {
                     const errors: Record<string, string> = {};
                     let isValid = true;
 
-                    // Валидация логина
                     const loginValue = formData.get('login') as string;
                     if (!validationRules.login(loginValue)) {
                         errors.login = 'Неверный логин';
                         isValid = false;
                     }
 
-                    // Валидация пароля
                     const passwordValue = formData.get('password') as string;
                     if (!validationRules.password(passwordValue)) {
                         errors.password = 'Неверный пароль';
                         isValid = false;
                     }
 
-                    // Обновляем состояние ошибок
                     this.setProps({ errors });
 
-                    // Если все поля валидны - выводим данные в консоль
                     if (isValid) {
                         console.log('Данные формы:', data);
                         window.navigate('list');
                     }
-                }
-                finally {
+                } finally {
                     this.isSubmitting = false;
                 }
             },
-
             handleKeyDown: (e: KeyboardEvent) => {
                 if (e.key === 'Enter') {
                     const form = (e.target as HTMLElement).closest('form');
                     if (form) {
-                        this.props.handleSubmit(form);
+                        this.props.handleSubmit?.(form);
                     }
                 }
             }
@@ -85,7 +77,6 @@ export class LoginPage extends Block {
         const isValid = validationRules[rule](value);
         const error = isValid ? '' : errorText;
 
-        // Откладываем обновление состояния до следующего тика event loop
         setTimeout(() => {
             this.setProps({
                 errors: {
@@ -97,14 +88,18 @@ export class LoginPage extends Block {
     }
 
     init() {
-        // Добавляем обработчики
+        // Используем существующую функцию handleKeyDown
+        const keydownHandler = this.props.handleKeyDown
+            ? (e: Event) => this.props.handleKeyDown!(e as KeyboardEvent)
+            : undefined;
+
         this.setProps({
             events: {
                 submit: (e: Event) => {
                     e.preventDefault();
-                    this.props.handleSubmit(e.target as HTMLFormElement);
+                    this.props.handleSubmit?.(e.target as HTMLFormElement);
                 },
-                keydown: this.props.handleKeyDown
+                keydown: keydownHandler
             }
         });
 
@@ -146,10 +141,9 @@ export class LoginPage extends Block {
             }
         });
 
-        // Убираем обработчик click с кнопки
         this.children.button = new Button({
             name: 'Авторизоваться',
-            type: 'submit', // Важно: type=submit
+            type: 'submit',
             style: 'primary'
         });
 

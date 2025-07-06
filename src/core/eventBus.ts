@@ -1,4 +1,4 @@
-type Handler = (...args: any[]) => void; // Тип для обработчиков событий
+type Handler = (..._args: unknown[]) => void; // Тип для обработчиков событий
 
 export class EventBus {
     private listeners: Record<string, Handler[]> = {}; // Хранилище обработчиков
@@ -18,7 +18,7 @@ export class EventBus {
     }
 
     // Инициирование события
-    emit(event: string, ...args: any[]) {
+    emit(event: string, ...args: unknown[]) {
         if (!this.listeners[event]) return; // Проверка наличия
         this.listeners[event].forEach(listener => listener(...args)); // Вызов обработчиков
     }

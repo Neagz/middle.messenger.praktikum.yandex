@@ -16,9 +16,13 @@ export default [
       react: eslintPluginReact
     },
     rules: {
-      ...eslintPluginReact.configs.recommended.rules,
-      "react/react-in-jsx-scope": "off",
-      "react/jsx-filename-extension": [1, { "extensions": [".tsx"] }]
+      "no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_"
+        }
+      ],
     }
   },
 
@@ -26,8 +30,8 @@ export default [
   {
     rules: {
       "no-unused-vars": "error",
-      "max-len": ["warn", 100],
-      "max-params": ["error", 3],
+      "max-len": ["warn", 150],
+      "max-params": ["error", 4],
       "import/prefer-default-export": "off"
     }
   },

@@ -3,8 +3,14 @@ import template from './list.hbs?raw';
 import { ButtonCallback, Input, Message, Link, Dialog, RemoveDialog } from "../../components";
 import { ValidationRule } from "../../utils/validation.ts";
 
-export class ListPage extends Block {
-    constructor(context: any = {}) {
+interface ListPageProps {
+    contacts?: unknown[];
+    onSend?: (_message: string) => void;
+    [key: string]: unknown;
+}
+
+export class ListPage extends Block<ListPageProps> {
+    constructor(context: ListPageProps = {}) {
         super({
             ...context
         });
@@ -34,13 +40,19 @@ export class ListPage extends Block {
 
         this.children.dialogIncoming1 = new Dialog({
             type: 'incoming',
-            content: 'Привет! Смотри, тут всплыл интересный кусок лунной космической истории — НАСА в какой-то момент попросила Хассельблад адаптировать модель SWC для полетов на Луну. Сейчас мы все знаем что астронавты летали с моделью 500 EL — и к слову говоря, все тушки этих камер все еще находятся на поверхности Луны, так как астронавты с собой забрали только кассеты с пленкой.',
+            content: 'Привет! Смотри, тут всплыл интересный кусок лунной космической истории — ' +
+                'НАСА в какой-то момент попросила Хассельблад адаптировать модель SWC для полетов на Луну. ' +
+                'Сейчас мы все знаем что астронавты летали с моделью 500 EL — и к слову говоря, ' +
+                'все тушки этих камер все еще находятся на поверхности Луны, ' +
+                'так как астронавты с собой забрали только кассеты с пленкой.',
             time: '11:56'
         });
 
         this.children.dialogIncoming2 = new Dialog({
             type: 'incoming',
-            content: 'Хассельблад в итоге адаптировал SWC для космоса, но что-то пошло не так и на ракету они так никогда и не попали. Всего их было произведено 25 штук, одну из них недавно продали на аукционе за 45000 евро.',
+            content: 'Хассельблад в итоге адаптировал SWC для космоса, но что-то пошло не так ' +
+                'и на ракету они так никогда и не попали. Всего их было произведено 25 штук, ' +
+                'одну из них недавно продали на аукционе за 45000 евро.',
             time: '11:56'
         });
 
@@ -61,8 +73,8 @@ export class ListPage extends Block {
             id: 'message',
             placeholder: 'Сообщение',
             name: 'message',
-            validateRule: 'message' as ValidationRule, // Добавляем правило валидации
-            errorText: 'Сообщение не должно быть пустым' // Кастомный текст ошибки
+            validateRule: 'message' as ValidationRule,
+            errorText: 'Сообщение не должно быть пустым'
         });
 
         this.children.sendButton = new ButtonCallback({
@@ -82,7 +94,6 @@ export class ListPage extends Block {
                     e.preventDefault();
                     const messageComponent = this.children.inputMessage as Message;
 
-                    // Проверяем валидность
                     const isValid = messageComponent.validate();
 
                     if (isValid) {
@@ -94,11 +105,11 @@ export class ListPage extends Block {
             }
         });
 
-        // Исправлено: используем RemoveDialog напрямую
         this.children.removeDialog = new RemoveDialog({
             title: 'Удалить пользователя',
         });
     }
+
     protected render(): DocumentFragment {
         return this.compile(template, this.props);
     }

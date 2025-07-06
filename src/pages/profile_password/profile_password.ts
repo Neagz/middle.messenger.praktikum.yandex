@@ -4,16 +4,26 @@ import { Input } from '../../components/input/input';
 import { Button } from '../../components/button/button';
 import {ValidationRule, validationRules} from '../../utils/validation';
 
-interface ProfilePasswordProps {
+interface ProfilePasswordPageProps {
     title?: string;
     label?: string;
     id?: string;
     name?: string;
     errors?: Record<string, string>;
+    labelOldPassword?: string;
+    labelNewPassword?: string;
+    labelRepeatPassword?: string;
+    idOldPassword?: string;
+    idNewPassword?: string;
+    idRepeatPassword?: string;
+    handleSubmit?: (_form: HTMLFormElement) => void;
+    handleKeyDown?: (_e: KeyboardEvent) => void;
+    [key: string]: unknown;
 }
-export class ProfilePasswordPage extends Block {
+
+export class ProfilePasswordPage extends Block<ProfilePasswordPageProps> {
     private isSubmitting = false;
-    constructor(props: ProfilePasswordProps = {}) {
+    constructor(props: ProfilePasswordPageProps = {}) {
         super({
             ...props,
             errors: {},
@@ -25,7 +35,6 @@ export class ProfilePasswordPage extends Block {
             idRepeatPassword: "repeatPassword",
 
             handleSubmit: (form: HTMLFormElement) => {
-                // Проверяем, не выполняется ли уже отправка
                 if (this.isSubmitting) return;
                 this.isSubmitting = true;
 
@@ -53,10 +62,8 @@ export class ProfilePasswordPage extends Block {
                         isValid = false;
                     }
 
-                    // Обновляем состояние ошибок
                     this.setProps({ errors });
 
-                    // Если все поля валидны - выводим данные в консоль
                     if (isValid) {
                         console.log('Данные формы:', data);
                         window.navigate('profile');
@@ -71,7 +78,7 @@ export class ProfilePasswordPage extends Block {
                 if (e.key === 'Enter') {
                     const form = (e.target as HTMLElement).closest('form');
                     if (form) {
-                        this.props.handleSubmit(form);
+                        this.props.handleSubmit?.(form);
                     }
                 }
             }
@@ -84,7 +91,6 @@ export class ProfilePasswordPage extends Block {
         const isValid = validationRules[rule](value);
         const error = isValid ? '' : errorText;
 
-        // Откладываем обновление состояния до следующего тика event loop
         setTimeout(() => {
             this.setProps({
                 errors: {
@@ -96,14 +102,17 @@ export class ProfilePasswordPage extends Block {
     }
 
     init() {
-        // Добавляем обработчики
+        const keydownHandler = this.props.handleKeyDown
+            ? (e: Event) => this.props.handleKeyDown!(e as KeyboardEvent)
+            : undefined;
+
         this.setProps({
             events: {
                 submit: (e: Event) => {
                     e.preventDefault();
-                    this.props.handleSubmit(e.target as HTMLFormElement);
+                    this.props.handleSubmit?.(e.target as HTMLFormElement);
                 },
-                keydown: this.props.handleKeyDown
+                keydown: keydownHandler
             }
         });
 

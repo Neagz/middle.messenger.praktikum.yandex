@@ -1,13 +1,20 @@
 import EventBus from './eventBus';
 import Handlebars from "handlebars";
 
-// Типы для событий и свойств
-type BlockEvents = { [key: string]: (_e: Event) => void };
-type BlockProps = { events?: BlockEvents; [key: string]: any };
-type BlockChildren = Record<string, Block | Block[]>; // Тип для дочерних компонентов
+// Базовый тип для событий
+type BlockEvents = { [key: string]: ((_e: Event) => void) | undefined };
 
-export class Block {
-    // События жизненного цикла
+// Базовый тип для пропсов
+export type BaseBlockProps = {
+    events?: BlockEvents;
+    children?: BlockChildren;
+    [key: string]: unknown;
+};
+
+// Тип для дочерних компонентов
+type BlockChildren = Record<string, Block | Block[]>;
+
+export class Block<P extends Record<string, unknown> = Record<string, unknown>> {
     static EVENTS = {
         INIT: "init",
         FLOW_CDM: "flow:component-did-mount",
@@ -16,18 +23,17 @@ export class Block {
     };
 
     protected _element: HTMLElement | null = null;
-    props: BlockProps;
+    props: P & BaseBlockProps; // Объединение специфичных и базовых пропсов
     private _eventBus: EventBus;
-    public children: BlockChildren = {}; // Дочерние компоненты
+    public children: BlockChildren = {};
 
-    constructor(propsAndChildren: BlockProps = {}) {
+    constructor(props: P & BaseBlockProps = {} as P & BaseBlockProps) {
         this._eventBus = new EventBus();
-        this.props = this._makePropsProxy(propsAndChildren); // Прокси для реактивности
-        this._registerEvents(this._eventBus); // Регистрация обработчиков событий
-        this._eventBus.emit(Block.EVENTS.INIT); // Инициирование инициализации
+        this.props = this._makePropsProxy({ ...props }) as P & BaseBlockProps;
+        this._registerEvents(this._eventBus);
+        this._eventBus.emit(Block.EVENTS.INIT);
     }
 
-    // Регистрация обработчиков событий жизненного цикла
     private _registerEvents(eventBus: EventBus) {
         eventBus.on(Block.EVENTS.INIT, this._init.bind(this));
         eventBus.on(Block.EVENTS.FLOW_CDM, this._componentDidMount.bind(this));
@@ -35,43 +41,41 @@ export class Block {
         eventBus.on(Block.EVENTS.FLOW_RENDER, this._render.bind(this));
     }
 
-    // Этап инициализации
     private _init() {
-        this.init(); // Пользовательская логика
-        this._eventBus.emit(Block.EVENTS.FLOW_RENDER); // Запуск рендеринга
+        this.init();
+        this._eventBus.emit(Block.EVENTS.FLOW_RENDER);
     }
 
-    protected init() {} // Переопределяется в дочерних классах
+    protected init() {}
 
-    // Этап монтирования
     private _componentDidMount() {
         this.componentDidMount();
     }
 
-    protected componentDidMount() {} // Переопределяется
+    protected componentDidMount() {}
 
     public dispatchComponentDidMount() {
         this._eventBus.emit(Block.EVENTS.FLOW_CDM);
     }
 
-    // Этап обновления
     private _componentDidUpdate() {
-        if (this.componentDidUpdate()) this._eventBus.emit(Block.EVENTS.FLOW_RENDER);
+        if (this.componentDidUpdate()) {
+            this._eventBus.emit(Block.EVENTS.FLOW_RENDER);
+        }
     }
 
-    protected componentDidUpdate() { return true; } // Логика обновления
+    protected componentDidUpdate() {
+        return true;
+    }
 
-    // Обновление свойств
-    setProps = (nextProps: Partial<BlockProps>) => {
+    setProps = (nextProps: Partial<P & BaseBlockProps>) => {
         Object.assign(this.props, nextProps);
     };
 
-    // Рендеринг
     private _render() {
         const fragment = this.render();
         const newElement = fragment.firstElementChild as HTMLElement;
 
-        // Сохраняем текущий активный элемент
         const activeElement = document.activeElement as HTMLElement;
         const activeElementId = activeElement?.id;
 
@@ -82,7 +86,6 @@ export class Block {
         this._element = newElement;
         this._addEvents();
 
-        // Восстанавливаем фокус
         if (activeElementId) {
             const newActiveElement = this._element.querySelector(`#${activeElementId}`);
             if (newActiveElement) {
@@ -92,24 +95,21 @@ export class Block {
     }
 
     protected render(): DocumentFragment {
-        return new DocumentFragment(); // Переопределяется
+        return new DocumentFragment();
     }
 
-    // Компиляция Handlebars-шаблонов
-    protected compile(template: string, context: any): DocumentFragment {
+    protected compile(template: string, context: Record<string, unknown>): DocumentFragment {
         const fragment = document.createElement('template');
         const componentContext = { ...context };
 
-        // Обработка дочерних компонентов
         Object.entries(this.children).forEach(([key, child]) => {
             if (child instanceof Block) {
-                componentContext[key] = `<div data-id="${key}"></div>`; // Заглушка
+                componentContext[key] = `<div data-id="${key}"></div>`;
             }
         });
 
         fragment.innerHTML = Handlebars.compile(template)(componentContext);
 
-        // Замена заглушек реальными компонентами
         Object.entries(this.children).forEach(([key, child]) => {
             const stub = fragment.content.querySelector(`[data-id="${key}"]`);
             if (stub && child instanceof Block) {
@@ -120,39 +120,37 @@ export class Block {
         return fragment.content;
     }
 
-    // Добавление событий из props
     private _addEvents() {
         const { events = {} } = this.props;
-
-        // Удаляем старые обработчики
+        // Удаляем только существующие обработчики
         if (this._element) {
             Object.entries(events).forEach(([event, listener]) => {
-                this._element?.removeEventListener(event, listener as EventListener);
+                if (typeof listener === 'function') {
+                    this._element?.removeEventListener(event, listener);
+                }
             });
         }
-
-        // Добавляем новые обработчики
+        // Добавляем обработчики с проверкой
         Object.entries(events).forEach(([event, listener]) => {
-            this._element?.addEventListener(event, listener as EventListener);
+            if (typeof listener === 'function') {
+                this._element?.addEventListener(event, listener);
+            }
         });
     }
 
-
-    // Прокси для отслеживания изменений props
-    private _makePropsProxy(props: BlockProps) {
-        return new Proxy(props, {
+    private _makePropsProxy(props: P & BaseBlockProps) {
+        return new Proxy(props as Record<string, unknown>, {
             set: (target, prop: string, value) => {
                 if (target[prop] !== value) {
                     target[prop] = value;
-                    this._eventBus.emit(Block.EVENTS.FLOW_CDU); // Триггер обновления
+                    this._eventBus.emit(Block.EVENTS.FLOW_CDU);
                 }
                 return true;
             },
             deleteProperty: () => { throw new Error('Нет доступа'); }
-        });
+        }) as P & BaseBlockProps;
     }
 
-    // Гарантированно возвращает HTMLElement
     getContent() {
         return this._element || document.createElement('div');
     }

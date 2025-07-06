@@ -4,16 +4,32 @@ import { Input } from '../../components/input/input';
 import { Button } from '../../components/button/button';
 import {ValidationRule, validationRules} from '../../utils/validation';
 
-interface ProfileEditProps {
+interface ProfileEditPageProps {
     title?: string;
     label?: string;
     id?: string;
     name?: string;
     errors?: Record<string, string>;
+    labelEmail?: string;
+    labelLogin?: string;
+    labelFirstName?: string;
+    labelSecondName?: string;
+    labelDisplayName?: string;
+    labelPhone?: string;
+    idEmail?: string;
+    idLogin?: string;
+    idFirstName?: string;
+    idSecondName?: string;
+    idDisplayName?: string;
+    idPhone?: string;
+    handleSubmit?: (_form: HTMLFormElement) => void;
+    handleKeyDown?: (_e: KeyboardEvent) => void;
+    [key: string]: unknown;
 }
-export class ProfileEditPage extends Block {
+
+export class ProfileEditPage extends Block<ProfileEditPageProps> {
     private isSubmitting = false;
-    constructor(props: ProfileEditProps = {} ) {
+    constructor(props: ProfileEditPageProps = {} ) {
         super({
             ...props,
             errors: {},
@@ -31,7 +47,6 @@ export class ProfileEditPage extends Block {
             idPhone: "phone",
 
             handleSubmit: (form: HTMLFormElement) => {
-                // Проверяем, не выполняется ли уже отправка
                 if (this.isSubmitting) return;
                 this.isSubmitting = true;
 
@@ -77,10 +92,8 @@ export class ProfileEditPage extends Block {
                         isValid = false;
                     }
 
-                    // Обновляем состояние ошибок
                     this.setProps({ errors });
 
-                    // Если все поля валидны - выводим данные в консоль
                     if (isValid) {
                         console.log('Данные формы:', data);
                         window.navigate('profile');
@@ -95,7 +108,7 @@ export class ProfileEditPage extends Block {
                 if (e.key === 'Enter') {
                     const form = (e.target as HTMLElement).closest('form');
                     if (form) {
-                        this.props.handleSubmit(form);
+                        this.props.handleSubmit?.(form);
                     }
                 }
             }
@@ -108,7 +121,6 @@ export class ProfileEditPage extends Block {
         const isValid = validationRules[rule](value);
         const error = isValid ? '' : errorText;
 
-        // Откладываем обновление состояния до следующего тика event loop
         setTimeout(() => {
             this.setProps({
                 errors: {
@@ -120,14 +132,17 @@ export class ProfileEditPage extends Block {
     }
 
     init() {
-        // Добавляем обработчики
+        const keydownHandler = this.props.handleKeyDown
+            ? (e: Event) => this.props.handleKeyDown!(e as KeyboardEvent)
+            : undefined;
+
         this.setProps({
             events: {
                 submit: (e: Event) => {
                     e.preventDefault();
-                    this.props.handleSubmit(e.target as HTMLFormElement);
+                    this.props.handleSubmit?.(e.target as HTMLFormElement);
                 },
-                keydown: this.props.handleKeyDown
+                keydown: keydownHandler
             }
         });
 
