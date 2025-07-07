@@ -93,12 +93,24 @@ function init() {
 
 // Глобальная навигация по кликам
 document.addEventListener('click', (e) => {
-  const target = e.target as HTMLElement;
-  const page = target.closest('[page]')?.getAttribute('page'); // Поиск атрибута page
-  if (page) {
-    navigate(page); // Переход
-    e.preventDefault(); // Отмена стандартного поведения
-    e.stopPropagation(); // Остановка всплытия
+  // Проверяем, что цель события является HTMLElement
+  if (!(e.target instanceof HTMLElement)) {
+    return;
+  }
+
+  const target = e.target;
+
+  // Ищем ближайший элемент с атрибутом 'page'
+  const pageElement = target.closest('[page]');
+
+  if (pageElement && pageElement instanceof HTMLElement) {
+    const page = pageElement.getAttribute('page');
+
+    if (page) {
+      navigate(page); // Переход
+      e.preventDefault(); // Отмена стандартного поведения
+      e.stopPropagation(); // Остановка всплытия
+    }
   }
 });
 

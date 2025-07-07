@@ -20,7 +20,7 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
         FLOW_CDM: "flow:component-did-mount",
         FLOW_CDU: "flow:component-did-update",
         FLOW_RENDER: "flow:render"
-    };
+    } as const;
 
     protected _element: HTMLElement | null = null;
     props: P & BaseBlockProps; // Объединение специфичных и базовых пропсов
@@ -73,6 +73,9 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
     };
 
     private _render() {
+        // Удаляем обработчики со старого элемента
+        this._removeEvents();
+
         const fragment = this.render();
         const newElement = fragment.firstElementChild as HTMLElement;
 
@@ -120,16 +123,19 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
         return fragment.content;
     }
 
-    private _addEvents() {
+    // Удаляем всех обработчиков событий
+    private _removeEvents() {
         const { events = {} } = this.props;
-        // Удаляем только существующие обработчики
         if (this._element) {
             Object.entries(events).forEach(([event, listener]) => {
                 if (typeof listener === 'function') {
-                    this._element?.removeEventListener(event, listener);
+                    this._element!.removeEventListener(event, listener);
                 }
             });
         }
+    }
+    private _addEvents() {
+        const { events = {} } = this.props;
         // Добавляем обработчики с проверкой
         Object.entries(events).forEach(([event, listener]) => {
             if (typeof listener === 'function') {
@@ -153,5 +159,12 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
 
     getContent() {
         return this._element || document.createElement('div');
+    }
+
+    // Метод для полной очистки
+    public destroy() {
+        this._removeEvents();
+        this._element?.remove();
+        this._element = null;
     }
 }

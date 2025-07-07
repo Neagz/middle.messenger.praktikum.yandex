@@ -1,7 +1,7 @@
 import { Block } from '../../core/block';
 import template from './profile.hbs?raw';
-import { Input } from '../../components/input/input';
-import { Link } from '../../components/link/link';
+import { Input } from '../../components';
+import { Link } from '../../components';
 
 interface ProfileProps {
     title?: string;

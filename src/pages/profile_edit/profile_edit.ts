@@ -1,7 +1,8 @@
 import { Block } from '../../core/block';
 import template from './profile_edit.hbs?raw';
-import { Input } from '../../components/input/input';
-import { Button } from '../../components/button/button';
+import { Input } from '../../components';
+import { Button } from '../../components';
+import { AvatarInput } from '../../components';
 import {ValidationRule, validationRules} from '../../utils/validation';
 
 interface ProfileEditPageProps {
@@ -22,6 +23,7 @@ interface ProfileEditPageProps {
     idSecondName?: string;
     idDisplayName?: string;
     idPhone?: string;
+    idAvatar?: string;
     handleSubmit?: (_form: HTMLFormElement) => void;
     handleKeyDown?: (_e: KeyboardEvent) => void;
     [key: string]: unknown;
@@ -45,6 +47,7 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
             idSecondName: "secondName",
             idDisplayName: "displayName",
             idPhone: "phone",
+            idAvatar: "avatar",
 
             handleSubmit: (form: HTMLFormElement) => {
                 if (this.isSubmitting) return;
@@ -95,6 +98,14 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
                     this.setProps({ errors });
 
                     if (isValid) {
+                        // Получаем файл аватарки
+                        const avatarFile = formData.get('avatar');
+
+                        if (avatarFile instanceof File && avatarFile.size > 0) {
+                            console.log('Аватар выбран:', avatarFile);
+                            // Здесь будет логика загрузки на сервер
+                        }
+
                         console.log('Данные формы:', data);
                         window.navigate('profile');
                     }
@@ -144,6 +155,11 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
                 },
                 keydown: keydownHandler
             }
+        });
+
+        this.children.avatarInput = new AvatarInput({
+            name: 'avatar',
+            currentAvatar: '/icon_profile.svg'
         });
 
         this.children.inputEmail = new Input({

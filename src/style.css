@@ -335,14 +335,12 @@ footer {
 .contact-item {
   display: flex;
   height: 72px;
-  width: 290px;
   border-top: 1px solid var(--color-divider);
   padding-top: 12px;
   padding-bottom: 12px;
 }
 
 .contact-item__active {
-  display: flex;
   height: 72px;
   width: calc(100% + 20px);
   margin-left: -10px;
@@ -919,4 +917,27 @@ footer {
 
 .message--error {
   outline: 1px solid var(--color-danger);
+}
+
+.avatar-input {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 21px;
+}
+
+.avatar-input__default-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  width: 130px;
+  height: 130px;
+  background-color: var(--color-bg-input);
+  border-radius: 50%;
+  background-image: url('/public/icon_profile.svg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 40px 40px;
 }
