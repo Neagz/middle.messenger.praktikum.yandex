@@ -1,22 +1,67 @@
-<main>
+<main class="page">
     <div class="center">
         <div class="box-profile">
             <form action="#" id="profile-form">
                 <div class="box__title_profile box__title_main">
-                    Редактор профиля
+                    <div class="avatar-input">
+                        <label class="form-item__label" for="{{idAvatar}}">
+                            {{#if currentAvatar}}
+                                <img src="{{currentAvatar}}">
+                            {{else}}
+                                <div class="avatar-input__default-icon"></div>
+                            {{/if}}
+                        </label>
+                        {{{ avatarInput }}}
+                    </div>
                 </div>
 
                 <div class="form-items form-items__profile form-items__border-bottom">
-                    {{> Input label="Почта" name="email" id="email" type="email" value="neagz@yandex.ru" }}
-                    {{> Input label="Логин" name="login" id="login" type="text" value="neagz" }}
-                    {{> Input label="Имя" name="first_name" id="first_name" type="text" value="Андрей" }}
-                    {{> Input label="Фамилия" name="second_name" id="second_name" type="text" value="Быстров" }}
-                    {{> Input label="Имя в чате" name="display_name" id="display_name" type="text" value="Андрей Б." }}
-                    {{> Input label="Телефон" name="phone" id="phone" type="text" value="+7 (999) 668 02 50" }}
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idEmail}}">{{labelEmail}}</label>
+                        {{{ inputEmail }}}
+                        {{#if errors.email}}
+                            <div class="form-item__error">{{errors.email}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idLogin}}">{{labelLogin}}</label>
+                        {{{ inputLogin }}}
+                        {{#if errors.login}}
+                            <div class="form-item__error">{{errors.login}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idFirstName}}">{{labelFirstName}}</label>
+                        {{{ inputFirstName }}}
+                        {{#if errors.firstName}}
+                            <div class="form-item__error">{{errors.firstName}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idSecondName}}">{{labelSecondName}}</label>
+                        {{{ inputSecondName }}}
+                        {{#if errors.secondName}}
+                            <div class="form-item__error">{{errors.secondName}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idDisplayName}}">{{labelDisplayName}}</label>
+                        {{{ inputDisplayName }}}
+                        {{#if errors.displayName}}
+                            <div class="form-item__error">{{errors.displayName}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idPhone}}">{{labelPhone}}</label>
+                        {{{ inputPhone }}}
+                        {{#if errors.phone}}
+                            <div class="form-item__error">{{errors.phone}}</div>
+                        {{/if}}
+                    </div>
                 </div>
 
                 <div class="group-buttons">
-                    {{> Button page="profile" name="Сохранить" type="submit" style="primary" }}
+                    {{{ button }}}
                 </div>
             </form>
         </div>

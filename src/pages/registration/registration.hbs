@@ -1,4 +1,4 @@
-<main>
+<main class="page">
     <div class="center">
         <div class="box box__shadow">
             <form action="#" id="registration-form">
@@ -7,18 +7,60 @@
                 </div>
 
                 <div class="form-items">
-                    {{> Input label="Почта" name="email" id="email" type="email" }}
-                    {{> Input label="Логин" name="login" id="login" type="text" errorName="Неверный логин" }}
-                    {{> Input label="Имя" name="first_name" id="first_name" type="text" }}
-                    {{> Input label="Фамилия" name="second_name" id="second_name" type="text" }}
-                    {{> Input label="Телефон" name="phone" id="phone" type="text"}}
-                    {{> Input label="Пароль" name="password" id="password" type="password" }}
-                    {{> Input label="Пароль (еще раз)" name="confirm_password" id="confirm_password" type="password" errorName="Пароли не совпадают" }}
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idEmail}}">{{labelEmail}}</label>
+                        {{{ inputEmail }}}
+                        {{#if errors.email}}
+                            <div class="form-item__error">{{errors.email}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idLogin}}">{{labelLogin}}</label>
+                        {{{ inputLogin }}}
+                        {{#if errors.login}}
+                            <div class="form-item__error">{{errors.login}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idFirstName}}">{{labelFirstName}}</label>
+                        {{{ inputFirstName }}}
+                        {{#if errors.firstName}}
+                            <div class="form-item__error">{{errors.firstName}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idSecondName}}">{{labelSecondName}}</label>
+                        {{{ inputSecondName }}}
+                        {{#if errors.secondName}}
+                            <div class="form-item__error">{{errors.secondName}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idPhone}}">{{labelPhone}}</label>
+                        {{{ inputPhone }}}
+                        {{#if errors.phone}}
+                            <div class="form-item__error">{{errors.phone}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idPassword}}">{{labelPassword}}</label>
+                        {{{ inputPassword }}}
+                        {{#if errors.password}}
+                            <div class="form-item__error">{{errors.password}}</div>
+                        {{/if}}
+                    </div>
+                    <div class="form-item__group">
+                        <label class="form-item__label" for="{{idConfirmPassword}}">{{labelConfirmPassword}}</label>
+                        {{{ inputConfirmPassword }}}
+                        {{#if errors.confirmPassword}}
+                            <div class="form-item__error">{{errors.confirmPassword}}</div>
+                        {{/if}}
+                    </div>
                 </div>
 
                 <div class="group-buttons">
-                    {{> Button page="nav" name="Зарегистрироваться" type="submit" style="primary" }}
-                    {{> Link page="login" position="center" style="primary" name="Войти"}}
+                    {{{ button }}}
+                    {{{ link }}}
                 </div>
             </form>
         </div>

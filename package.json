@@ -4,18 +4,44 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "vite",
+    "dev": "vite",
+    "start": "npm run build && npm run preview",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint:ts": "eslint src/**/*.ts",
+    "lint:fix-ts": "eslint --fix src/**/*.ts",
+    "lint:css": "stylelint src/**/*.css src/**/*.scss",
+    "lint:fix-css": "stylelint --fix src/**/*.css src/**/*.scss",
+    "lint": "npm run lint:ts && npm run lint:css"
   },
   "engines": {
     "node": "23.8.0"
   },
   "devDependencies": {
-    "typescript": "~5.7.2",
+    "@eslint/js": "^9.27.0",
+    "@types/node": "^22.15.29",
+    "@types/react": "^19.1.5",
+    "@types/react-dom": "^19.1.5",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-import-resolver-typescript": "^4.3.5",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.1.0",
+    "handlebars": "^4.7.8",
+    "nanoid": "^5.1.5",
+    "stylelint": "^16.19.1",
+    "stylelint-config-standard": "^38.0.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.32.1",
     "vite": "^6.2.0"
   },
   "dependencies": {
-    "handlebars": "^4.7.8"
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "vite-plugin-handlebars": "^2.0.0"
   }
 }

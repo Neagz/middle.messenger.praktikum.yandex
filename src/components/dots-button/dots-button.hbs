@@ -1,0 +1,7 @@
+<button
+        class="dots-button__dialog dots-button__text dots-icon__{{icon}} {{className}}"
+        type="{{type}}"
+        {{#if events}}onclick="(function(e){this.events.click(e)}).bind(this)(event)"{{/if}}
+>
+    {{name}}
+</button>
