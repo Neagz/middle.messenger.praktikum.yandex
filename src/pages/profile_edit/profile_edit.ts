@@ -132,14 +132,9 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
         const isValid = validationRules[rule](value);
         const error = isValid ? '' : errorText;
 
-        setTimeout(() => {
-            this.setProps({
-                errors: {
-                    ...this.props.errors,
-                    [fieldName]: error
-                }
-            });
-        }, 0);
+        queueMicrotask(() => {
+            this.setProps({ errors: { ...this.props.errors, [fieldName]: error } });
+        });
     }
 
     init() {

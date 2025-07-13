@@ -1,8 +1,8 @@
 import { Block, BaseBlockProps } from '../../core/block';
 import template from './login.hbs?raw';
-import { Input } from '../../components/input/input';
-import { Button } from '../../components/button/button';
-import { Link } from '../../components/link/link';
+import { Input } from '../../components';
+import { Button } from '../../components';
+import { Link } from '../../components';
 import { ValidationRule, validationRules } from '../../utils/validation';
 
 // Расширяем базовые пропсы специфичными для страницы
@@ -77,14 +77,9 @@ export class LoginPage extends Block<LoginPageProps> {
         const isValid = validationRules[rule](value);
         const error = isValid ? '' : errorText;
 
-        setTimeout(() => {
-            this.setProps({
-                errors: {
-                    ...this.props.errors,
-                    [fieldName]: error
-                }
-            });
-        }, 0);
+        queueMicrotask(() => {
+            this.setProps({ errors: { ...this.props.errors, [fieldName]: error } });
+        });
     }
 
     init() {
@@ -109,6 +104,7 @@ export class LoginPage extends Block<LoginPageProps> {
             type: 'text',
             autocomplete: 'login',
             validateRule: 'login' as ValidationRule,
+            placeholder: 'Логин',
             events: {
                 blur: (e: Event) => {
                     const target = e.target as HTMLInputElement;
@@ -128,6 +124,7 @@ export class LoginPage extends Block<LoginPageProps> {
             type: 'password',
             autocomplete: 'new-password',
             validateRule: 'password' as ValidationRule,
+            placeholder: 'Пароль',
             events: {
                 blur: (e: Event) => {
                     const target = e.target as HTMLInputElement;

@@ -1,7 +1,7 @@
 import { Block } from '../../core/block';
 import template from './profile_password.hbs?raw';
-import { Input } from '../../components/input/input';
-import { Button } from '../../components/button/button';
+import { Input } from '../../components';
+import { Button } from '../../components';
 import {ValidationRule, validationRules} from '../../utils/validation';
 
 interface ProfilePasswordPageProps {
@@ -91,14 +91,9 @@ export class ProfilePasswordPage extends Block<ProfilePasswordPageProps> {
         const isValid = validationRules[rule](value);
         const error = isValid ? '' : errorText;
 
-        setTimeout(() => {
-            this.setProps({
-                errors: {
-                    ...this.props.errors,
-                    [fieldName]: error
-                }
-            });
-        }, 0);
+        queueMicrotask(() => {
+            this.setProps({ errors: { ...this.props.errors, [fieldName]: error } });
+        });
     }
 
     init() {

@@ -141,6 +141,35 @@ footer {
   text-align: left;
   flex: none;
   color: var(--color-text-muted);
+  transition: all 0.3s ease;
+}
+
+.form-items__profile .form-item__label {
+  margin-bottom: 0;
+  display: block;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 13px;
+  text-align: left;
+  color: var(--color-text-main);
+}
+
+.form-item__input:not(:placeholder-shown) + .form-item__label,
+.form-item__input:focus + .form-item__label {
+  opacity: 1;
+  height: auto;
+  overflow: visible;
+  margin-bottom: 1px;
+  padding: initial;
+}
+
+/* stylelint-disable-next-line selector-not-notation */
+.form-item__group:not(:focus-within) .form-item__label:not(.always-visible):not(:has(+ .form-item__input:not(:placeholder-shown))) {
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 .form-item__input {
@@ -168,16 +197,6 @@ footer {
 
 .group-buttons__profile {
   gap: 0;
-}
-
-.form-items__profile .form-item__label {
-  margin-bottom: 0;
-  display: block;
-  font-weight: 500;
-  font-size: 13px;
-  line-height: 13px;
-  text-align: left;
-  color: var(--color-text-main);
 }
 
 .form-items__profile .form-item__input {

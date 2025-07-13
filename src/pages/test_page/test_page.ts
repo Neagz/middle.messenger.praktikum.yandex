@@ -57,6 +57,7 @@ export class TestPage extends Block<TestPageProps> {
             type: 'text',
             autocomplete: 'login',
             validateRule: 'login' as ValidationRule,
+            placeholder: 'Логин',
             events: {
                 blur: (e: Event) => {
                     const target = e.target as HTMLInputElement;
@@ -76,6 +77,7 @@ export class TestPage extends Block<TestPageProps> {
             type: 'password',
             autocomplete: 'new-password',
             validateRule: 'password' as ValidationRule,
+            placeholder: 'Пароль',
             events: {
                 blur: (e: Event) => {
                     const target = e.target as HTMLInputElement;
