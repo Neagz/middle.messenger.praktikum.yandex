@@ -34,6 +34,18 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
         this._eventBus.emit(Block.EVENTS.INIT);
     }
 
+    hide() {
+        if (this._element) {
+            this._element.style.display = 'none';
+        }
+    }
+
+    show() {
+        if (this._element) {
+            this._element.style.removeProperty('display');
+        }
+    }
+
     private _registerEvents(eventBus: EventBus) {
         eventBus.on(Block.EVENTS.INIT, this._init.bind(this));
         eventBus.on(Block.EVENTS.FLOW_CDM, this._componentDidMount.bind(this));
@@ -164,7 +176,18 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
     // Метод для полной очистки
     public destroy() {
         this._removeEvents();
-        this._element?.remove();
-        this._element = null;
+        if (this._element) {
+            this._element.remove();
+            this._element = null;
+        }
+
+        // Рекурсивно уничтожаем дочерние компоненты
+        Object.values(this.children).forEach(child => {
+            if (Array.isArray(child)) {
+                child.forEach(c => c.destroy());
+            } else {
+                child.destroy();
+            }
+        });
     }
 }

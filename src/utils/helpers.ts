@@ -1,4 +1,16 @@
-import type { Indexed } from './types';
+export type Indexed<T = unknown> = {
+    [_key in string]: T;
+};
+
+// renderDOM
+export function render(query: string, block: any) {
+    const root = document.querySelector(query);
+    if (root) {
+        root.innerHTML = '';
+        root.appendChild(block.getContent());
+    }
+    return root;
+}
 
 // isEqual
 export function isEqual(a: unknown, b: unknown): boolean {

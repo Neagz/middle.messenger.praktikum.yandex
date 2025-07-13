@@ -3,6 +3,8 @@ import './style.css';
 import * as Pages from './pages'; // Страницы
 import * as Components from './components'; // Компоненты
 import { Block } from "./core/block"; // Базовый класс
+import Router from './utils/router';
+import {LoginPage, RegistrationPage, ProfilePage, ListPage, Page404, Page500, ProfileEditPage, ProfilePasswordPage} from './pages';
 
 interface HelperContext {
   name: string;
@@ -46,6 +48,19 @@ const pagesConfig: Record<string, PageConfig> = {
   }
 };
 
+// Регистрация маршрутов
+const router = new Router('#app');
+router
+    .use('/', LoginPage)
+    .use('/sign-up', RegistrationPage)
+    .use('/settings', ProfilePage)
+    .use('/settings-edit', ProfileEditPage)
+    .use('/settings-password', ProfilePasswordPage)
+    .use('/messenger', ListPage, { context: pagesConfig.list.context })
+    .use('/404', Page404)
+    .use('/500', Page500)
+    .start();
+
 // Улучшенная регистрация хелперов с поддержкой вложенного контента
 Object.entries(Components).forEach(([componentName, ComponentClass]) => {
   Handlebars.registerHelper(componentName, function (this: HelperContext, ...args: unknown[]) {
@@ -63,6 +78,18 @@ Object.entries(Components).forEach(([componentName, ComponentClass]) => {
   });
 });
 
+// Глобальная навигация по кликам
+document.addEventListener('click', (e) => {
+  const target = e.target as HTMLElement;
+  const link = target.closest('a[href^="/"]');
+
+  if (link) {
+    e.preventDefault();
+    router.go(link.getAttribute('href')!);
+  }
+});
+
+/**
 // Навигация между страницами
 function navigate(page: string) {
   const config = pagesConfig[page] || pagesConfig['404']; // Конфиг или 404
@@ -120,3 +147,4 @@ document.addEventListener('DOMContentLoaded', init);
 // Экспорт навигации в глобальную область
 declare global { interface Window { navigate: (_page: string) => void; } }
 window.navigate = navigate;
+ */

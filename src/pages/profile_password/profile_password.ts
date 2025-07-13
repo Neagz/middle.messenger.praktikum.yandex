@@ -1,8 +1,8 @@
 import { Block } from '../../core/block';
 import template from './profile_password.hbs?raw';
-import { Input } from '../../components';
-import { Button } from '../../components';
+import { Input, Button } from '../../components';
 import {ValidationRule, validationRules} from '../../utils/validation';
+import Router from '../../utils/router';
 
 interface ProfilePasswordPageProps {
     title?: string;
@@ -23,6 +23,7 @@ interface ProfilePasswordPageProps {
 
 export class ProfilePasswordPage extends Block<ProfilePasswordPageProps> {
     private isSubmitting = false;
+    private router: Router;
     constructor(props: ProfilePasswordPageProps = {}) {
         super({
             ...props,
@@ -66,7 +67,7 @@ export class ProfilePasswordPage extends Block<ProfilePasswordPageProps> {
 
                     if (isValid) {
                         console.log('Данные формы:', data);
-                        window.navigate('profile');
+                        this.router.go('/settings');
                     }
                 }
                 finally {
@@ -83,6 +84,17 @@ export class ProfilePasswordPage extends Block<ProfilePasswordPageProps> {
                 }
             }
         });
+        this.router = new Router();
+    }
+
+    componentDidMount() {
+        // Принудительно обновляем компонент после загрузки
+        setTimeout(() => {
+            this.setProps({
+                ...this.props,
+                forceUpdate: Math.random() // Произвольное изменение для триггера
+            });
+        }, 100);
     }
 
     handleBlur = (fieldName: string, value: string, rule: ValidationRule | undefined, errorText: string) => {

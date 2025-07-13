@@ -2,6 +2,7 @@ import { Block } from '../../core/block';
 import template from './list.hbs?raw';
 import { ButtonCallback, Input, Message, Link, Dialog, RemoveDialog } from "../../components";
 import { ValidationRule } from "../../utils/validation";
+import Router from '../../utils/router';
 
 interface ListPageProps {
     contacts?: unknown[];
@@ -10,18 +11,34 @@ interface ListPageProps {
 }
 
 export class ListPage extends Block<ListPageProps> {
+    private router: Router;
     constructor(context: ListPageProps = {}) {
         super({
-            ...context
+            ...context,
         });
+        this.router = new Router();
+    }
+    componentDidMount() {
+        // Принудительно обновляем компонент после загрузки
+        setTimeout(() => {
+            this.setProps({
+                ...this.props,
+                forceUpdate: Math.random() // Произвольное изменение для триггера
+            });
+        }, 100);
     }
 
     init() {
         this.children.link = new Link({
-            page: 'profile',
             position: 'center',
             style: 'chats',
-            name: 'Профиль >'
+            name: 'Профиль >',
+            events: {
+                click: (e: Event) => {
+                    e.preventDefault();
+                    this.router.go('/settings');
+                }
+            }
         });
 
         this.children.inputSearch = new Input({

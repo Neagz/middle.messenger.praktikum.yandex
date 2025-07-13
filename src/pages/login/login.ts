@@ -4,6 +4,7 @@ import { Input } from '../../components';
 import { Button } from '../../components';
 import { Link } from '../../components';
 import { ValidationRule, validationRules } from '../../utils/validation';
+import Router from '../../utils/router';
 
 // Расширяем базовые пропсы специфичными для страницы
 interface LoginPageProps extends BaseBlockProps {
@@ -19,6 +20,7 @@ interface LoginPageProps extends BaseBlockProps {
 
 export class LoginPage extends Block<LoginPageProps> {
     private isSubmitting = false;
+    private router: Router;
 
     constructor(props: LoginPageProps = {}) {
         super({
@@ -54,7 +56,7 @@ export class LoginPage extends Block<LoginPageProps> {
 
                     if (isValid) {
                         console.log('Данные формы:', data);
-                        window.navigate('list');
+                        this.router.go('/messenger');
                     }
                 } finally {
                     this.isSubmitting = false;
@@ -67,8 +69,20 @@ export class LoginPage extends Block<LoginPageProps> {
                         this.props.handleSubmit?.(form);
                     }
                 }
-            }
+            },
         });
+
+        this.router = new Router();
+    }
+
+    componentDidMount() {
+        // Принудительно обновляем компонент после загрузки
+        setTimeout(() => {
+            this.setProps({
+                ...this.props,
+                forceUpdate: Math.random() // Произвольное изменение для триггера
+            });
+        }, 100);
     }
 
     handleBlur = (fieldName: string, value: string, rule: ValidationRule | undefined, errorText: string) => {
@@ -145,10 +159,15 @@ export class LoginPage extends Block<LoginPageProps> {
         });
 
         this.children.link = new Link({
-            page: 'registration',
             position: 'center',
             style: 'primary',
-            name: 'Нет аккаунта?'
+            name: 'Нет аккаунта?',
+            events: {
+                click: (e: Event) => {
+                    e.preventDefault();
+                    this.router.go('/sign-up');
+                }
+            }
         });
     }
 

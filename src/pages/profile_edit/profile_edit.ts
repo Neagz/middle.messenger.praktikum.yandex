@@ -1,9 +1,8 @@
 import { Block } from '../../core/block';
 import template from './profile_edit.hbs?raw';
-import { Input } from '../../components';
-import { Button } from '../../components';
-import { AvatarInput } from '../../components';
+import { Input, Button, AvatarInput } from '../../components';
 import {ValidationRule, validationRules} from '../../utils/validation';
+import Router from '../../utils/router';
 
 interface ProfileEditPageProps {
     title?: string;
@@ -31,6 +30,7 @@ interface ProfileEditPageProps {
 
 export class ProfileEditPage extends Block<ProfileEditPageProps> {
     private isSubmitting = false;
+    private router: Router;
     constructor(props: ProfileEditPageProps = {} ) {
         super({
             ...props,
@@ -107,7 +107,7 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
                         }
 
                         console.log('Данные формы:', data);
-                        window.navigate('profile');
+                        this.router.go('/settings');
                     }
                 }
                 finally {
@@ -124,6 +124,17 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
                 }
             }
         });
+        this.router = new Router();
+    }
+
+    componentDidMount() {
+        // Принудительно обновляем компонент после загрузки
+        setTimeout(() => {
+            this.setProps({
+                ...this.props,
+                forceUpdate: Math.random() // Произвольное изменение для триггера
+            });
+        }, 100);
     }
 
     handleBlur = (fieldName: string, value: string, rule: ValidationRule | undefined, errorText: string) => {

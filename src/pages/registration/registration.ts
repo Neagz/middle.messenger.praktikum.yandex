@@ -1,9 +1,8 @@
 import { Block } from '../../core/block';
 import template from './registration.hbs?raw';
-import { Input } from '../../components';
-import { Button } from '../../components';
-import { Link } from '../../components';
+import { Input, Button, Link } from '../../components';
 import {ValidationRule, validationRules} from '../../utils/validation';
+import Router from '../../utils/router';
 
 interface RegistrationPageProps {
     title?: string;
@@ -32,6 +31,7 @@ interface RegistrationPageProps {
 
 export class RegistrationPage extends Block<RegistrationPageProps> {
     private isSubmitting = false;
+    private router: Router;
     constructor(props: RegistrationPageProps = {}) {
         super({
             ...props,
@@ -107,7 +107,7 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
 
                     if (isValid) {
                         console.log('Данные формы:', data);
-                        window.navigate('list');
+                        this.router.go('/messenger');
                     }
                 }
                 finally {
@@ -124,6 +124,17 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
                 }
             }
         });
+        this.router = new Router();
+    }
+
+    componentDidMount() {
+        // Принудительно обновляем компонент после загрузки
+        setTimeout(() => {
+            this.setProps({
+                ...this.props,
+                forceUpdate: Math.random() // Произвольное изменение для триггера
+            });
+        }, 100);
     }
 
     handleBlur = (fieldName: string, value: string, rule: ValidationRule | undefined, errorText: string) => {
@@ -299,10 +310,15 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
         });
 
         this.children.link = new Link({
-            page: 'login',
             position: 'center',
             style: 'primary',
-            name: 'Войти'
+            name: 'Войти',
+            events: {
+                click: (e: Event) => {
+                    e.preventDefault();
+                    this.router.go('/');
+                }
+            }
         });
     }
 

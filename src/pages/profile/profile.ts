@@ -1,7 +1,7 @@
 import { Block } from '../../core/block';
 import template from './profile.hbs?raw';
-import { Input } from '../../components';
-import { Link } from '../../components';
+import { Input, Link  } from '../../components';
+import Router from '../../utils/router';
 
 interface ProfileProps {
     title?: string;
@@ -11,6 +11,7 @@ interface ProfileProps {
     errors?: Record<string, string>;
 }
 export class ProfilePage extends Block {
+    private router: Router;
     constructor(props: ProfileProps = {}) {
         super({
             ...props,
@@ -28,6 +29,17 @@ export class ProfilePage extends Block {
             idDisplayName: "displayName",
             idPhone: "phone",
         });
+        this.router = new Router();
+    }
+
+    componentDidMount() {
+        // Принудительно обновляем компонент после загрузки
+        setTimeout(() => {
+            this.setProps({
+                ...this.props,
+                forceUpdate: Math.random() // Произвольное изменение для триггера
+            });
+        }, 100);
     }
 
     init() {
@@ -93,7 +105,6 @@ export class ProfilePage extends Block {
         });
 
         this.children.linkEdit = new Link({
-            page: 'profile_edit',
             position: 'left',
             type: 'submit',
             style: 'profile_primary',
@@ -101,6 +112,7 @@ export class ProfilePage extends Block {
             events: {
                 click: (e: Event) => {
                     e.preventDefault();
+                    this.router.go('/settings-edit');
                     const form = document.getElementById('profile-form') as HTMLFormElement;
 
                     if (form) {
@@ -113,17 +125,27 @@ export class ProfilePage extends Block {
         });
 
         this.children.linkPassword = new Link({
-            page: 'profile_password',
             position: 'left',
             style: 'profile_primary',
-            name: 'Изменить пароль'
+            name: 'Изменить пароль',
+            events: {
+                click: (e: Event) => {
+                    e.preventDefault();
+                    this.router.go('/settings-password');
+                }
+            }
         });
 
         this.children.linkLogout = new Link({
-            page: 'nav',
             position: 'left',
             style: 'profile_secondary',
-            name: 'Выйти'
+            name: 'Выйти',
+            events: {
+                click: (e: Event) => {
+                    e.preventDefault();
+                    this.router.go('/');
+                }
+            }
         });
     }
 
