@@ -944,6 +944,7 @@ footer {
   align-items: center;
   width: 100%;
   margin-bottom: 21px;
+  transition: all 0.3s ease;
 }
 
 .avatar-input__default-icon {

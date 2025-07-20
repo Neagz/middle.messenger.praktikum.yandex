@@ -3,6 +3,8 @@ import template from './registration.hbs?raw';
 import { Input, Button, Link } from '../../components';
 import {ValidationRule, validationRules} from '../../utils/validation';
 import Router from '../../utils/router';
+import { ISignUpData } from "../../utils/types";
+import { authController } from "../../controllers";
 
 interface RegistrationPageProps {
     title?: string;
@@ -45,19 +47,19 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
             labelConfirmPassword: "Пароль (еще раз)",
             idEmail: "email",
             idLogin: "login",
-            idFirstName: "firstName",
-            idSecondName: "secondName",
+            idFirstName: "first_name",
+            idSecondName: "second_name",
             idPhone: "phone",
             idPassword: "password",
             idConfirmPassword: "confirmPassword",
 
-            handleSubmit: (form: HTMLFormElement) => {
+            handleSubmit: async (form: HTMLFormElement) => {
                 if (this.isSubmitting) return;
                 this.isSubmitting = true;
 
                 try {
                     const formData = new FormData(form);
-                    const data = Object.fromEntries(formData.entries());
+                    const data = Object.fromEntries(formData.entries()) as ISignUpData;
                     const errors: Record<string, string> = {};
                     let isValid = true;
 
@@ -73,15 +75,15 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
                         isValid = false;
                     }
 
-                    const firstNameValue = formData.get('firstName') as string;
+                    const firstNameValue = formData.get('first_name') as string;
                     if (!validationRules.name(firstNameValue)) {
-                        errors.firstName = 'Неверное Имя';
+                        errors.first_name = 'Неверное Имя';
                         isValid = false;
                     }
 
-                    const secondNameValue = formData.get('secondName') as string;
+                    const secondNameValue = formData.get('second_name') as string;
                     if (!validationRules.name(secondNameValue)) {
-                        errors.secondName = 'Неверная Фамилия';
+                        errors.second_name = 'Неверная Фамилия';
                         isValid = false;
                     }
 
@@ -106,10 +108,24 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
                     this.setProps({ errors });
 
                     if (isValid) {
+                        await authController.signUp({
+                            first_name: data.first_name,
+                            second_name: data.second_name,
+                            login: data.login,
+                            email: data.email,
+                            phone: data.phone,
+                            password: data.password
+                        });
                         console.log('Данные формы:', data);
                         this.router.go('/messenger');
                     }
                 }
+
+                catch (error: any) {
+                    console.error('Registration error:', error);
+                    this.setProps({ errors: { form: error.reason || 'Ошибка регистрации' } });
+                }
+
                 finally {
                     this.isSubmitting = false;
                 }
@@ -204,8 +220,8 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
         });
 
         this.children.inputFirstName = new Input({
-            name: 'firstName',
-            id: 'firstName',
+            name: 'first_name',
+            id: 'first_name',
             type: 'text',
             autocomplete: 'first_name',
             validateRule: 'name' as ValidationRule,
@@ -224,8 +240,8 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
         });
 
         this.children.inputSecondName = new Input({
-            name: 'secondName',
-            id: 'secondName',
+            name: 'second_name',
+            id: 'second_name',
             type: 'text',
             autocomplete: 'family_name',
             validateRule: 'name' as ValidationRule,
@@ -307,6 +323,17 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
             name: 'Зарегистрироваться',
             type: 'submit',
             style: 'primary',
+            events: {
+                submit: (e: Event) => {
+                    e.preventDefault(); // Блокируем стандартную отправку формы
+                    const form = e.target as HTMLFormElement;
+
+                    if (form.method !== 'POST') { // Проверяем метод формы
+                        console.error('Форма должна использовать POST!');
+                        return;
+                    }
+                }
+            }
         });
 
         this.children.link = new Link({

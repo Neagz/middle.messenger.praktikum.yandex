@@ -1,14 +1,12 @@
 import { Block } from '../../core/block';
 import template from './profile_edit.hbs?raw';
 import { Input, Button, AvatarInput } from '../../components';
-import {ValidationRule, validationRules} from '../../utils/validation';
+import { ValidationRule, validationRules } from '../../utils/validation';
 import Router from '../../utils/router';
+import { store } from "../../core/store";
+import { userController } from "../../controllers";
 
 interface ProfileEditPageProps {
-    title?: string;
-    label?: string;
-    id?: string;
-    name?: string;
     errors?: Record<string, string>;
     labelEmail?: string;
     labelLogin?: string;
@@ -31,7 +29,10 @@ interface ProfileEditPageProps {
 export class ProfileEditPage extends Block<ProfileEditPageProps> {
     private isSubmitting = false;
     private router: Router;
-    constructor(props: ProfileEditPageProps = {} ) {
+
+    constructor(props: ProfileEditPageProps = {}) {
+        const user = store.getState().user;
+
         super({
             ...props,
             errors: {},
@@ -48,69 +49,71 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
             idDisplayName: "displayName",
             idPhone: "phone",
             idAvatar: "avatar",
+            emailValue: user?.email || '',
+            loginValue: user?.login || '',
+            firstNameValue: user?.first_name || '',
+            secondNameValue: user?.second_name || '',
+            displayNameValue: user?.display_name || '',
+            phoneValue: user?.phone || '',
+            currentAvatar: user?.avatar || '',
 
-            handleSubmit: (form: HTMLFormElement) => {
+            handleSubmit: async (form: HTMLFormElement) => {
                 if (this.isSubmitting) return;
                 this.isSubmitting = true;
 
                 try {
                     const formData = new FormData(form);
-                    const data = Object.fromEntries(formData.entries());
                     const errors: Record<string, string> = {};
                     let isValid = true;
 
-                    const emailValue = formData.get('email') as string;
-                    if (!validationRules.email(emailValue)) {
-                        errors.email = 'Неверная почта';
-                        isValid = false;
-                    }
+                    // Валидация полей
+                    const validateField = (name: string, rule: ValidationRule, errorText: string) => {
+                        const value = formData.get(name) as string;
+                        if (!validationRules[rule](value)) {
+                            errors[name] = errorText;
+                            isValid = false;
+                        }
+                    };
 
-                    const loginValue = formData.get('login') as string;
-                    if (!validationRules.login(loginValue)) {
-                        errors.login = 'Неверный логин';
-                        isValid = false;
-                    }
-
-                    const firstNameValue = formData.get('firstName') as string;
-                    if (!validationRules.name(firstNameValue)) {
-                        errors.firstName = 'Неверное Имя';
-                        isValid = false;
-                    }
-
-                    const secondNameValue = formData.get('secondName') as string;
-                    if (!validationRules.name(secondNameValue)) {
-                        errors.secondName = 'Неверная Фамилия';
-                        isValid = false;
-                    }
-
-                    const displayNameValue = formData.get('displayName') as string;
-                    if (!validationRules.message(displayNameValue)) {
-                        errors.displayName = 'Неверное Имя в чате';
-                        isValid = false;
-                    }
-
-                    const phoneValue = formData.get('phone') as string;
-                    if (!validationRules.phone(phoneValue)) {
-                        errors.phone = 'Неверный телефон';
-                        isValid = false;
-                    }
+                    validateField('email', 'email', 'Неверная почта');
+                    validateField('login', 'login', 'Неверный логин');
+                    validateField('firstName', 'name', 'Неверное имя');
+                    validateField('secondName', 'name', 'Неверная фамилия');
+                    validateField('displayName', 'message', 'Неверное имя в чате');
+                    validateField('phone', 'phone', 'Неверный телефон');
 
                     this.setProps({ errors });
 
+                    // Получаем файл из AvatarInput
+                    const avatarFile = (this.children.avatarInput as AvatarInput).getFile();
+
+                    if (avatarFile) {
+                        // Добавляем файл в FormData
+                        formData.append('avatar', avatarFile);
+                    }
+
+                    // Отправляем аватар
+                    if (avatarFile) {
+                        await userController.changeAvatar(formData);
+                    }
+
                     if (isValid) {
-                        // Получаем файл аватарки
-                        const avatarFile = formData.get('avatar');
+                        const profileData = {
+                            first_name: formData.get('firstName') as string,
+                            second_name: formData.get('secondName') as string,
+                            display_name: formData.get('displayName') as string,
+                            login: formData.get('login') as string,
+                            email: formData.get('email') as string,
+                            phone: formData.get('phone') as string
+                        };
 
-                        if (avatarFile instanceof File && avatarFile.size > 0) {
-                            console.log('Аватар выбран:', avatarFile);
-                            // Здесь будет логика загрузки на сервер
-                        }
-
-                        console.log('Данные формы:', data);
+                        await userController.changeProfile(profileData);
                         this.router.go('/settings');
                     }
-                }
-                finally {
+                } catch (e) {
+                    console.error("Ошибка при сохранении:", e);
+                    store.set({ error: e instanceof Error ? e.message : "Ошибка обновления профиля" });
+                } finally {
                     this.isSubmitting = false;
                 }
             },
@@ -124,67 +127,75 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
                 }
             }
         });
+
         this.router = new Router();
+        store.on('changed', () => {
+            this.updateAvatarFromStore();
+        });
+    }
+
+    private updateAvatarFromStore() {
+        const user = store.getState().user;
+        if (user?.avatar !== this.props.currentAvatar) {
+            this.setProps({ currentAvatar: user?.avatar });
+            this.updateAvatarDisplay();
+        }
+    }
+
+    private updateAvatarDisplay() {
+        const user = store.getState().user;
+        const avatarElement = this._element?.querySelector('.avatar-input__default-icon') as HTMLElement;
+
+        if (!avatarElement) return;
+
+        // Удаляем все классы и стили
+        avatarElement.className = '';
+        avatarElement.removeAttribute('style');
+
+        // Создаём новый класс
+        const newClass = user?.avatar ? 'avatar-custom' : 'avatar-default';
+        avatarElement.classList.add('avatar-input__default-icon', newClass);
+
+        if (user?.avatar) {
+            avatarElement.style.backgroundImage = `url(https://ya-praktikum.tech/api/v2/resources${user.avatar})`;
+            avatarElement.style.backgroundSize = 'cover';
+        }
     }
 
     componentDidMount() {
-        // Принудительно обновляем компонент после загрузки
-        setTimeout(() => {
-            this.setProps({
-                ...this.props,
-                forceUpdate: Math.random() // Произвольное изменение для триггера
-            });
-        }, 100);
+        this.updateAvatarDisplay();
     }
 
-    handleBlur = (fieldName: string, value: string, rule: ValidationRule | undefined, errorText: string) => {
-        if (!rule) return;
-
-        const isValid = validationRules[rule](value);
+    private handleBlur(e: Event, rule: ValidationRule, errorText: string) {
+        const target = e.target as HTMLInputElement;
+        const isValid = validationRules[rule](target.value);
         const error = isValid ? '' : errorText;
 
-        queueMicrotask(() => {
-            this.setProps({ errors: { ...this.props.errors, [fieldName]: error } });
-        });
+        queueMicrotask(() => ({
+            errors: { ...this.props.errors, [target.name]: error }
+        }));
     }
 
     init() {
-        const keydownHandler = this.props.handleKeyDown
-            ? (e: Event) => this.props.handleKeyDown!(e as KeyboardEvent)
-            : undefined;
-
-        this.setProps({
-            events: {
-                submit: (e: Event) => {
-                    e.preventDefault();
-                    this.props.handleSubmit?.(e.target as HTMLFormElement);
-                },
-                keydown: keydownHandler
-            }
-        });
+        const user = store.getState().user;
 
         this.children.avatarInput = new AvatarInput({
+            id: 'avatar',
             name: 'avatar',
-            currentAvatar: '/icon_profile.svg'
+            currentAvatar: user?.avatar
+                ? `https://ya-praktikum.tech/api/v2/resources${user.avatar}`
+                : undefined
         });
 
+        // Инициализация остальных полей...
         this.children.inputEmail = new Input({
             name: 'email',
             id: 'email',
             type: 'email',
-            value: 'neagz@yandex.ru',
-            placeholder: 'neagz@yandex.ru',
-            autocomplete: 'email',
+            value: user?.email || '',
+            placeholder: 'Почта',
             events: {
-                blur: (e: Event) => {
-                    const target = e.target as HTMLInputElement;
-                    this.handleBlur(
-                        target.name,
-                        target.value,
-                        'email' as ValidationRule,
-                        'Неверная почта'
-                    );
-                }
+                blur: (e: Event) => this.handleBlur(e, 'email', 'Неверная почта')
             }
         });
 
@@ -192,19 +203,11 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
             name: 'login',
             id: 'login',
             type: 'text',
-            value: 'neagz',
-            placeholder: 'neagz',
+            value: user?.login || '',
+            placeholder: user?.login || 'Логин',
             autocomplete: 'login',
             events: {
-                blur: (e: Event) => {
-                    const target = e.target as HTMLInputElement;
-                    this.handleBlur(
-                        target.name,
-                        target.value,
-                        'login' as ValidationRule,
-                        'Неверный логин'
-                    );
-                }
+                blur: (e: Event) => this.handleBlur(e, 'login', 'Неверный логин')
             }
         });
 
@@ -212,19 +215,11 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
             name: 'firstName',
             id: 'firstName',
             type: 'text',
-            value: 'Андрей',
-            placeholder: 'Андрей',
+            value: user?.first_name || '',
+            placeholder: user?.first_name || 'Имя',
             autocomplete: 'first_name',
             events: {
-                blur: (e: Event) => {
-                    const target = e.target as HTMLInputElement;
-                    this.handleBlur(
-                        target.name,
-                        target.value,
-                        'name' as ValidationRule,
-                        'Неверное Имя'
-                    );
-                }
+                blur: (e: Event) => this.handleBlur(e, 'name', 'Неверное Имя')
             }
         });
 
@@ -232,19 +227,11 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
             name: 'secondName',
             id: 'secondName',
             type: 'text',
-            value: 'Быстров',
-            placeholder: 'Быстров',
+            value: user?.second_name || '',
+            placeholder: user?.second_name || 'Фамилия',
             autocomplete: 'family_name',
             events: {
-                blur: (e: Event) => {
-                    const target = e.target as HTMLInputElement;
-                    this.handleBlur(
-                        target.name,
-                        target.value,
-                        'name' as ValidationRule,
-                        'Неверная Фамилия'
-                    );
-                }
+                blur: (e: Event) => this.handleBlur(e, 'name', 'Неверная Фамилия')
             }
         });
 
@@ -252,19 +239,11 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
             name: 'displayName',
             id: 'displayName',
             type: 'text',
-            value: 'Андрей Б.',
-            placeholder: 'Андрей Б.',
+            value: user?.display_name || '',
+            placeholder: user?.display_name || 'Имя в чате',
             autocomplete: 'name',
             events: {
-                blur: (e: Event) => {
-                    const target = e.target as HTMLInputElement;
-                    this.handleBlur(
-                        target.name,
-                        target.value,
-                        'name' as ValidationRule,
-                        'Неверное Имя в чате'
-                    );
-                }
+                blur: (e: Event) => this.handleBlur(e, 'name', 'Неверное Имя в чате')
             }
         });
 
@@ -272,19 +251,11 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
             name: 'phone',
             id: 'phone',
             type: 'text',
-            value: '+79996680250',
-            placeholder: '+7 (999) 668 02 50',
+            value: user?.phone || '',
+            placeholder: user?.phone || 'Телефон',
             autocomplete: 'phone',
             events: {
-                blur: (e: Event) => {
-                    const target = e.target as HTMLInputElement;
-                    this.handleBlur(
-                        target.name,
-                        target.value,
-                        'phone' as ValidationRule,
-                        'Неверный телефон'
-                    );
-                }
+                blur: (e: Event) => this.handleBlur(e, 'phone', 'Неверный телефон')
             }
         });
 
@@ -292,6 +263,18 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
             name: 'Сохранить',
             type: 'submit',
             style: 'primary',
+        });
+
+        this.setProps({
+            events: {
+                submit: (e: Event) => {
+                    e.preventDefault();
+                    this.props.handleSubmit?.(e.target as HTMLFormElement);
+                },
+                keydown: (e: Event) => {
+                    this.props.handleKeyDown?.(e as KeyboardEvent);
+                }
+            }
         });
     }
 

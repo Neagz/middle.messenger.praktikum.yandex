@@ -1,11 +1,14 @@
 import Route from './route';
+import { authController } from '../controllers/auth-controller';
+import { store } from "../core/store";
 
+// Главный класс роутера (Singleton)
 export default class Router {
-    private static __instance: Router;
-    private routes: Route[];
-    private history: History;
-    private _currentRoute: Route | null;
-    private _rootQuery: string;
+    private static __instance: Router; // Единственный экземпляр
+    private routes: Route[]; // Список маршрутов
+    private history: History; // API History браузера
+    private _currentRoute: Route | null; // Текущий маршрут
+    private _rootQuery: string; // Селектор корневого элемента
 
     constructor(rootQuery: string = '#app') {
         if (Router.__instance) {
@@ -20,55 +23,88 @@ export default class Router {
         Router.__instance = this;
     }
 
+    // Регистрация маршрута
     use(pathname: string, block: any, props: { context?: Record<string, unknown> } = {}) {
         const route = new Route(pathname, block, {
             rootQuery: this._rootQuery,
             context: props.context
         });
         this.routes.push(route);
-        return this;
+        return this; // Для чейнинга
     }
 
+    // Запуск роутера
     start() {
+        // Обработка навигации по истории
         window.onpopstate = (event: PopStateEvent) => {
             const target = event.currentTarget as Window;
             this._onRoute(target.location.pathname);
         };
 
-        this._onRoute(window.location.pathname);
+        this._onRoute(window.location.pathname); // Первоначальная загрузка
     }
 
+    // Проверка авторизации
+    private async checkAuth(): Promise<boolean> {
+        try {
+            const user = await authController.fetchUser();
+            if (user) {
+                store.set({ user }); // Обновляем store
+                return true;
+            }
+            return false;
+        } catch (e) {
+            return false;
+        }
+    }
+    // Обработка перехода на маршрут
     private async _onRoute(pathname: string) {
+        const isAuth = await this.checkAuth();
+
+        // Редиректы для неавторизованных
+        if (!isAuth && !['/', '/sign-up'].includes(pathname)) {
+            this.go('/');
+            return;
+        }
+
+        // Редиректы для авторизованных
+        if (isAuth && ['/', '/sign-up'].includes(pathname)) {
+            this.go('/messenger');
+            return;
+        }
+
+        // Поиск маршрута
         const route = this.getRoute(pathname);
         if (!route) {
             this.go('/404');
             return;
         }
 
-        // Очищаем текущий роут
+        // Переход на новый маршрут
         if (this._currentRoute) {
             this._currentRoute.leave();
-            await new Promise(resolve => setTimeout(resolve, 10)); // Микро-задержка
         }
-
-        // Рендерим новый роут
         this._currentRoute = route;
         route.render();
     }
 
+    // Переход по пути
     go(pathname: string) {
         this.history.pushState({}, '', pathname);
         this._onRoute(pathname);
     }
 
+    // Назад по истории
     back() {
         this.history.back();
     }
 
+    // Вперед по истории
     forward() {
         this.history.forward();
     }
 
+    // Поиск маршрута по пути
     getRoute(pathname: string) {
         return this.routes.find(route => route.match(pathname));
     }

@@ -1,102 +1,83 @@
-type RequestData = Record<string, unknown> | FormData;
+import { store } from '../core/store';
 
-/* eslint-disable no-unused-vars */
+type PlainObject = Record<string, unknown>;
+type RequestData = PlainObject | FormData;
+
+// Перечисление HTTP методов
 enum HTTPMethod {
     GET = 'GET',
     POST = 'POST',
     PUT = 'PUT',
     DELETE = 'DELETE'
 }
-/* eslint-enable no-unused-vars */
 
-/* eslint-disable no-unused-vars */
-enum HttpStatus {
-    OK = 200,
-    Created = 201,
-    Accepted = 202,
-    NoContent = 204,
-    BadRequest = 400,
-    Unauthorized = 401,
-    Forbidden = 403,
-    NotFound = 404,
-    InternalServerError = 500
-}
-/* eslint-enable no-unused-vars */
-
+// Класс для выполнения HTTP-запросов
 class HTTPTransport {
-    private baseUrl: string;
+    private baseUrl: string = 'https://ya-praktikum.tech/api/v2'; // Базовый URL для всех запросов
 
-    constructor(baseUrl: string = '') {
-        this.baseUrl = baseUrl;
-    }
-
-    // Фабричный метод для создания HTTP-методов
-    private createMethod(method: HTTPMethod) {
-        return (url: string, data?: RequestData) => this.request(method, url, data);
-    }
-
-    // Методы HTTP, созданные через фабричный метод
-    protected readonly get = this.createMethod(HTTPMethod.GET);
-    protected readonly post = this.createMethod(HTTPMethod.POST);
-    protected readonly put = this.createMethod(HTTPMethod.PUT);
-    protected readonly delete = this.createMethod(HTTPMethod.DELETE);
-
-    private request(
+    // Базовый метод для выполнения запросов
+    private request<T>(
         method: HTTPMethod,
         url: string,
         data?: RequestData
-    ): Promise<XMLHttpRequest> {
+    ): Promise<T> {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             const fullUrl = this.baseUrl + url;
 
-            // Для GET-запросов добавляем параметры в URL
-            if (method === HTTPMethod.GET && data) {
-                const params = new URLSearchParams(data as Record<string, string>);
-                xhr.open(method, `${fullUrl}?${params.toString()}`);
-            } else {
-                xhr.open(method, fullUrl);
+            // 1. Сначала открываем соединение
+            xhr.open(method, fullUrl);
+
+            // 2. Затем устанавливаем заголовки
+            xhr.withCredentials = true;
+
+            xhr.responseType = 'json';
+
+            if (method !== HTTPMethod.GET && data && !(data instanceof FormData)) {
+                xhr.setRequestHeader('Content-Type', 'application/json');
             }
 
+            // Обработчики событий
             xhr.onload = () => {
-                // Проверка успешных статусов через enum
-                if (
-                    xhr.status === HttpStatus.OK ||
-                    xhr.status === HttpStatus.Created ||
-                    xhr.status === HttpStatus.Accepted ||
-                    xhr.status === HttpStatus.NoContent ||
-                    xhr.status === HttpStatus.BadRequest||
-                    xhr.status === HttpStatus.Unauthorized||
-                    xhr.status === HttpStatus.Forbidden||
-                    xhr.status === HttpStatus.NotFound ||
-                    xhr.status === HttpStatus.InternalServerError
-                ) {
-                    resolve(xhr);
+                if (xhr.status === 401) {
+                    store.set({ user: null });
+                    reject(new Error('Unauthorized'));
+                    return;
+                }
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve(xhr.response as T);
                 } else {
-                    reject(xhr);
+                    reject(new Error(xhr.response?.reason || 'Request failed'));
                 }
             };
 
-            // Обработка ошибок
-            xhr.onabort = () => reject(xhr);
-            xhr.onerror = () => reject(xhr);
-            xhr.ontimeout = () => reject(xhr);
+            xhr.onerror = () => reject(new Error('Network error'));
+            xhr.ontimeout = () => reject(new Error('Request timeout'));
 
-            // Для не-GET запросов отправляем данные в теле
-            if (method !== HTTPMethod.GET && data) {
-                // Если это FormData (например, файл)
-                if (data instanceof FormData) {
-                    xhr.send(data);
-                }
-                // Если обычные данные
-                else {
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    xhr.send(JSON.stringify(data));
-                }
-            } else {
+            // 3. Отправляем данные
+            if (method === HTTPMethod.GET || !data) {
                 xhr.send();
+            } else {
+                xhr.send(data instanceof FormData ? data : JSON.stringify(data));
             }
         });
+    }
+
+    // Публичные методы для каждого HTTP-метода
+    public get<T>(url: string, data?: RequestData): Promise<T> {
+        return this.request<T>(HTTPMethod.GET, url, data);
+    }
+
+    public post<T>(url: string, data?: RequestData): Promise<T> {
+        return this.request<T>(HTTPMethod.POST, url, data);
+    }
+
+    public put<T>(url: string, data?: RequestData): Promise<T> {
+        return this.request<T>(HTTPMethod.PUT, url, data);
+    }
+
+    public delete<T>(url: string, data?: RequestData): Promise<T> {
+        return this.request<T>(HTTPMethod.DELETE, url, data);
     }
 }
 

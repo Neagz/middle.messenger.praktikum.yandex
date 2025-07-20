@@ -4,6 +4,7 @@ import * as Pages from './pages'; // Страницы
 import * as Components from './components'; // Компоненты
 import { Block } from "./core/block"; // Базовый класс
 import Router from './utils/router';
+import { authController, userController } from './controllers';
 import {LoginPage, RegistrationPage, ProfilePage, ListPage, Page404, Page500, ProfileEditPage, ProfilePasswordPage} from './pages';
 
 interface HelperContext {
@@ -50,6 +51,10 @@ const pagesConfig: Record<string, PageConfig> = {
 
 // Регистрация маршрутов
 const router = new Router('#app');
+// Инициализируем контроллеры с роутером
+authController.setRouter(router);
+userController.setRouter(router);
+
 router
     .use('/', LoginPage)
     .use('/sign-up', RegistrationPage)

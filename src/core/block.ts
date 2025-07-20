@@ -1,5 +1,6 @@
 import EventBus from './eventBus';
 import Handlebars from "handlebars";
+import {avatarManager} from "../services/avatar-manager";
 
 // Базовый тип для событий
 type BlockEvents = { [key: string]: ((_e: Event) => void) | undefined };
@@ -88,6 +89,12 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
         // Удаляем обработчики со старого элемента
         this._removeEvents();
 
+        // Сохраняем состояние компонентов
+        const states = Object.entries(this.children).map(([key, child]) => ({
+            key,
+            state: (child as any).saveState?.()
+        }));
+
         const fragment = this.render();
         const newElement = fragment.firstElementChild as HTMLElement;
 
@@ -99,7 +106,14 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
         }
 
         this._element = newElement;
+
+        // Восстанавливаем состояние
+        states.forEach(({ key, state }) => {
+            (this.children[key] as any)?.restoreState?.(state);
+        });
+
         this._addEvents();
+        avatarManager.clear();
 
         if (activeElementId) {
             const newActiveElement = this._element.querySelector(`#${activeElementId}`);

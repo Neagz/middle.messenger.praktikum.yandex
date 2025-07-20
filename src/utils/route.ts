@@ -1,11 +1,12 @@
 import { Block } from "../core/block";
 import { isEqual, render } from './helpers';
 
+// Класс для управления отдельным маршрутом
 export default class Route {
-    private _pathname: string;
-    private _blockClass: new (props: any) => Block;
-    private _block: Block | null = null;
-    private _props: { rootQuery: string; context?: Record<string, unknown> };
+    private _pathname: string; // Путь маршрута
+    private _blockClass: new (props: any) => Block; // Класс компонента для этого маршрута
+    private _block: Block | null = null; // Экземпляр компонента
+    private _props: { rootQuery: string; context?: Record<string, unknown> }; // Свойства для рендеринга
 
     constructor(
         pathname: string,
@@ -17,6 +18,7 @@ export default class Route {
         this._props = props;
     }
 
+    // Переход на маршрут
     navigate(pathname: string) {
         if (this.match(pathname)) {
             this._pathname = pathname;
@@ -24,35 +26,33 @@ export default class Route {
         }
     }
 
+    // Уничтожение компонента маршрута
     leave() {
         if (this._block) {
-            this._block.destroy(); // Полностью уничтожаем старый блок
+            this._block.destroy();
             this._block = null;
         }
     }
 
+    // Проверка соответствия маршрута
     match(pathname: string) {
         return isEqual(pathname, this._pathname);
     }
 
+    // Рендер компонента маршрута
     render() {
-        // Полностью очищаем предыдущий блок
-        this.leave();
+        this.leave(); // Очистка предыдущего компонента
 
-        // Создаем новый экземпляр блока
+        // Создаем новый экземпляр компонента
         this._block = new this._blockClass(this._props.context || {});
 
-        // Получаем root-элемент
         const root = document.querySelector(this._props.rootQuery);
         if (!root) {
             throw new Error(`Root element not found: ${this._props.rootQuery}`);
         }
 
-        // Полностью очищаем root перед рендером
-        root.innerHTML = '';
-
-        // Рендерим новый блок
-        render(this._props.rootQuery, this._block);
-        this._block.dispatchComponentDidMount();
+        root.innerHTML = ''; // Очищаем контейнер
+        render(this._props.rootQuery, this._block); // Рендерим компонент
+        this._block.dispatchComponentDidMount(); // Инициализируем компонент
     }
 }
