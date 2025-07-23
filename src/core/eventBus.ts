@@ -10,11 +10,16 @@ export class EventBus {
     }
 
     // Отписка от события
-    off(event: string, callback: Handler) {
+    off(event: string, callback?: Handler) {
         if (!this.listeners[event]) throw new Error(`Нет события: ${event}`);
-        this.listeners[event] = this.listeners[event].filter(
-            listener => listener !== callback // Фильтрация обработчиков
-        );
+
+        if (callback) {
+            this.listeners[event] = this.listeners[event].filter(
+                listener => listener !== callback
+            );
+        } else {
+            delete this.listeners[event];
+        }
     }
 
     // Инициирование события

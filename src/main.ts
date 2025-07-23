@@ -4,7 +4,7 @@ import * as Pages from './pages'; // Страницы
 import * as Components from './components'; // Компоненты
 import { Block } from "./core/block"; // Базовый класс
 import Router from './utils/router';
-import { authController, userController } from './controllers';
+import {authController, chatsController, userController} from './controllers';
 import {LoginPage, RegistrationPage, ProfilePage, ListPage, Page404, Page500, ProfileEditPage, ProfilePasswordPage} from './pages';
 
 interface HelperContext {
@@ -42,9 +42,6 @@ const pagesConfig: Record<string, PageConfig> = {
         {avatar:'avatar.png', name:'Day.', preview:'Так увлёкся работой по курсу, что совсем забыл его анонсир...', timestamp:'1 мая 2020'},
         {avatar:'avatar.png', name:'Стас Рогозин', preview:'Можно или сегодня или завтра вечером.', timestamp:'12 апреля 2020'}
       ],
-      showDialog: false,
-      showActionDialogMessage: true,
-      showActionDialogUser: true
     }
   }
 };
@@ -54,6 +51,7 @@ const router = new Router('#app');
 // Инициализируем контроллеры с роутером
 authController.setRouter(router);
 userController.setRouter(router);
+chatsController.setRouter(router);
 
 router
     .use('/', LoginPage)
@@ -80,6 +78,9 @@ Object.entries(Components).forEach(([componentName, ComponentClass]) => {
 
     const instance = new (ComponentClass)(props);
     return new Handlebars.SafeString(instance.getContent()?.outerHTML || '');
+  });
+  Handlebars.registerHelper('eq', function(a, b, options) {
+    return a === b ? options.fn(this) : options.inverse(this);
   });
 });
 

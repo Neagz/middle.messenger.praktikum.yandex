@@ -6,16 +6,21 @@
             </div>
             <div class="chat__search">
                 {{{ inputSearch }}}
+                {{{ createChatButton }}}
             </div>
             <nav class="chat__contacts" aria-label="Список контактов">
                 {{#each contacts}}
-                    {{{ ContactItem avatar=avatar name=name preview=preview timestamp=timestamp unread=unread fromMe=fromMe active=active }}}
+                    {{{ ContactItem }}}
                 {{/each}}
             </nav>
         </aside>
 
         <div class="chat__main">
-
+            {{#if showNoChatSelected}}
+                    <div class="chat__empty">
+                        Выберите чат чтобы отправить сообщение
+                    </div>
+            {{else}}
             <header class="chat-header">
                 <div class="chat-header__user">
                     <div class="chat-header__avatar">
@@ -30,20 +35,29 @@
                         <span></span>
                     </button>
                     {{#if showActionDialogUser}}
-                        <div class="chat-header__actions-dialog">
-                            {{{DotsButton icon="add" name="Добавить пользователя"}}}
-                            {{{DotsButton icon="remove" name="Удалить пользователя" className="remove-button"}}}
-                        </div>
+                        {{{actionDialogUser}}}
                     {{/if}}
                 </div>
             </header>
 
             <article class="chat__messages">
+                {{#if showNoMessages}}
+                    <div class="chat__empty">
+                        Нет сообщений
+                    </div>
+                {{else}}
+                    {{#each messages}}
+                        {{{ Dialog }}}
+                    {{/each}}
+
                 <time class="chat__date">19 июня</time>
+
                 {{{ Dialog type="incoming" Multiple="true" content="Привет! Смотри, тут всплыл интересный кусок лунной космической истории — НАСА в какой-то момент попросила Хассельблад адаптировать модель SWC для полетов на Луну. Сейчас мы все знаем что астронавты летали с моделью 500 EL — и к слову говоря, все тушки этих камер все еще находятся на поверхности Луны, так как астронавты с собой забрали только кассеты с пленкой."
                            content-two="Хассельблад в итоге адаптировал SWC для космоса, но что-то пошло не так и на ракету они так никогда и не попали. Всего их было произведено 25 штук, одну из них недавно продали на аукционе за 45000 евро." time="11:56"}}}
                 {{{ Dialog type="incoming" Image="true" content="camera.png" time="11:56" }}}
                 {{{ Dialog type="outgoing" Outgoing="true" content="Круто!" time="12:00" }}}
+
+                {{/if}}
             </article>
 
             <footer class="message-input">
@@ -59,10 +73,11 @@
                 {{{ inputMessage }}}
                 {{{ sendButton }}}
             </footer>
+            {{/if}}
         </div>
 
         {{#if showDialog}}
-                {{{removeDialog}}}
+            {{{userActionDialog}}}
         {{/if}}
 
     </div>

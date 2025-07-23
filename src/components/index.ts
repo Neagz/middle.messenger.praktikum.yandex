@@ -14,4 +14,4 @@ export { Message } from './message/message';
 // Диалоговые компоненты
 export { ActionDialogMessage } from './action-dialog-message/action-dialog-message';
 export { ActionDialogUser } from './action-dialog-user/action-dialog-user';
-export { RemoveDialog } from './remove-dialog/remove-dialog';
+export { ChangingDialog } from './changing-dialog/changing-dialog';

@@ -18,4 +18,8 @@ export class UserAPI extends BaseAPI {
     changePassword(data: IPasswordData) {
         return this.http.put('/user/password', data);
     }
+
+    searchUser(login: string): Promise<UserResponse[]> {
+        return this.http.post<UserResponse[]>('/user/search', { login });
+    }
 }

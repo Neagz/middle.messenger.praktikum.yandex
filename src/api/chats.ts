@@ -1,16 +1,13 @@
 import { BaseAPI } from './base-api';
 
 export class ChatsAPI extends BaseAPI {
-    constructor() {
-        super('/chats');
-    }
 
     getChats() {
-        return this.http.get('/');
+        return this.http.get('/chats');
     }
 
     createChat(title: string) {
-        return this.http.post('/', { title });
+        return this.http.post('/chats', { title });
     }
 
     addUser(data: { chatId: number, userId: number }) {

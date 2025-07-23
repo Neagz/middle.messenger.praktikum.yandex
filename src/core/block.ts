@@ -77,7 +77,7 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
         }
     }
 
-    protected componentDidUpdate() {
+    protected componentDidUpdate(_oldProps?: P, _newProps?: P): boolean {
         return true;
     }
 
@@ -121,6 +121,15 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
                 (newActiveElement as HTMLElement).focus();
             }
         }
+
+        const { events = {} } = this.props;
+
+        Object.entries(events).forEach(([event, listener]) => {
+            if (typeof listener === 'function') {
+                // Добавляем обработчик на корневой элемент
+                this._element?.addEventListener(event, listener as EventListener);
+            }
+        });
     }
 
     protected render(): DocumentFragment {
@@ -162,10 +171,19 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
     }
     private _addEvents() {
         const { events = {} } = this.props;
+
+        this._removeEvents();
         // Добавляем обработчики с проверкой
         Object.entries(events).forEach(([event, listener]) => {
             if (typeof listener === 'function') {
-                this._element?.addEventListener(event, listener);
+                // Привязываем контекст и сохраняем ссылку на обработчик
+                const boundListener = (e: Event) => {
+                    console.log(`Событие ${event} сработало на ${this.constructor.name}`);
+                    listener.call(this, e); // Явная привязка контекста
+                };
+                (this._element as HTMLElement).addEventListener(event, boundListener);
+                // Сохраняем для последующего удаления
+                this._eventListeners.push({ event, listener: boundListener });
             }
         });
     }
@@ -186,6 +204,9 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
     getContent() {
         return this._element || document.createElement('div');
     }
+
+    // Добавляем массив для хранения обработчиков
+    private _eventListeners: { event: string; listener: EventListener }[] = [];
 
     // Метод для полной очистки
     public destroy() {

@@ -76,6 +76,30 @@ export class UserController {
             store.set({ error: e.reason || 'Password change failed' });
         }
     }
+
+    async searchUser(login: string): Promise<UserData | null> {
+        try {
+            const users = await this.api.searchUser(login);
+            if (users.length > 0) {
+                const user = users[0];
+                return {
+                    id: user.id,
+                    first_name: user.first_name,
+                    second_name: user.second_name,
+                    display_name: user.display_name || `${user.first_name} ${user.second_name}`,
+                    login: user.login,
+                    email: user.email,
+                    phone: user.phone,
+                    avatar: user.avatar || '' // Гарантируем string вместо string | undefined
+                };
+            }
+            return null;
+        } catch (e: any) {
+            console.error('User search error:', e);
+            store.set({ error: e.reason || 'User search failed' });
+            return null;
+        }
+    }
 }
 
 export const userController = new UserController();

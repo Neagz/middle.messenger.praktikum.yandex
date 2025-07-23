@@ -82,7 +82,10 @@ export class ChatsController {
     }
 
     selectChat(chat: ChatData) {
-        store.set({ currentChat: chat });
+        store.set({
+            currentChat: chat,
+            messages: {} // Очищаем сообщения при смене чата
+        });
     }
 }
 

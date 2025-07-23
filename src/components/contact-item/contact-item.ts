@@ -9,15 +9,34 @@ interface ContactItemProps {
     unread?: string;
     fromMe?: boolean;
     active?: boolean;
-    events?: {
-        click: (_e: Event) => void;
-    };
+    onContactClick?: () => void;
     [key: string]: unknown;
 }
 
 export class ContactItem extends Block {
     constructor(props: ContactItemProps) {
-        super(props);
+        super({
+            ...props,
+            events: {
+                click: (e: Event) => {
+                    console.log('ContactItem click handler executed');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    props.onContactClick?.(); // Вызываем колбэк
+                }
+            }
+        });
+
+        // Явная привязка контекста
+        this.handleClick = this.handleClick.bind(this);
+    }
+
+    private handleClick(e: Event) {
+        const props = this.props as ContactItemProps;
+        console.log('Bound click handler called');
+        e.preventDefault();
+        e.stopPropagation();
+        props.onContactClick?.();
     }
 
     protected render(): DocumentFragment {
