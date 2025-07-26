@@ -2,6 +2,7 @@ import { Block } from '../../core/block';
 import template from './contact-item.hbs?raw';
 
 interface ContactItemProps {
+    id: number;
     avatar: string;
     name: string;
     preview: string;
@@ -19,25 +20,33 @@ export class ContactItem extends Block {
             ...props,
             events: {
                 click: (e: Event) => {
-                    console.log('ContactItem click handler executed');
                     e.preventDefault();
                     e.stopPropagation();
-                    props.onContactClick?.(); // Вызываем колбэк
+                    props.onContactClick?.();
                 }
             }
         });
-
-        // Явная привязка контекста
-        this.handleClick = this.handleClick.bind(this);
     }
 
-    private handleClick(e: Event) {
-        const props = this.props as ContactItemProps;
-        console.log('Bound click handler called');
-        e.preventDefault();
-        e.stopPropagation();
-        props.onContactClick?.();
+    protected componentDidUpdate(oldProps: ContactItemProps, newProps: ContactItemProps): boolean {
+        // Если изменилось только active или unread - обновляем вручную
+        if (oldProps.active !== newProps.active || oldProps.unread !== newProps.unread) {
+            const element = this.getContent();
+            if (element) {
+                // Обновляем класс активности
+                element.classList.toggle('contact-item__active', !!newProps.active);
+
+                // Обновляем счетчик непрочитанных
+                const unreadEl = element.querySelector('.contact-item__unread-count');
+                if (unreadEl) {
+                    unreadEl.textContent = newProps.unread || '';
+                }
+            }
+            return false; // Не делать полный перерендер
+        }
+        return true; // Сделать полный перерендер
     }
+
 
     protected render(): DocumentFragment {
         return this.compile(template, this.props);

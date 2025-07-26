@@ -29,11 +29,7 @@
                     <div class="chat-header__username">Вадим</div>
                 </div>
                 <div class="chat-header__actions">
-                    <button class="dots-button__settings">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </button>
+                    {{{dotsSettingsButton}}}
                     {{#if showActionDialogUser}}
                         {{{actionDialogUser}}}
                     {{/if}}
@@ -49,14 +45,6 @@
                     {{#each messages}}
                         {{{ Dialog }}}
                     {{/each}}
-
-                <time class="chat__date">19 июня</time>
-
-                {{{ Dialog type="incoming" Multiple="true" content="Привет! Смотри, тут всплыл интересный кусок лунной космической истории — НАСА в какой-то момент попросила Хассельблад адаптировать модель SWC для полетов на Луну. Сейчас мы все знаем что астронавты летали с моделью 500 EL — и к слову говоря, все тушки этих камер все еще находятся на поверхности Луны, так как астронавты с собой забрали только кассеты с пленкой."
-                           content-two="Хассельблад в итоге адаптировал SWC для космоса, но что-то пошло не так и на ракету они так никогда и не попали. Всего их было произведено 25 штук, одну из них недавно продали на аукционе за 45000 евро." time="11:56"}}}
-                {{{ Dialog type="incoming" Image="true" content="camera.png" time="11:56" }}}
-                {{{ Dialog type="outgoing" Outgoing="true" content="Круто!" time="12:00" }}}
-
                 {{/if}}
             </article>
 

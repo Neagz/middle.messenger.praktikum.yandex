@@ -12,7 +12,7 @@ export function withStore<P extends Record<string, unknown>>(WrappedBlock: new (
             const state = store.getState();
             const mappedProps = mapStateToProps(state);
 
-            super({ ...props, ...mappedProps });
+            super({ ...props, ...mappedProps, ...mapStateToProps(store.getState()) });
 
             this.onChangeStoreCallback = () => {
                 const newState = store.getState();

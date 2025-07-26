@@ -8,8 +8,7 @@ import {
     Link,
     Dialog,
     ChangingDialog,
-    ActionDialogUser,
-    ContactItem
+    ContactItem, DotsSettingsButton, ActionDialogUser
 } from '../../components';
 import { ValidationRule } from '../../utils/validation';
 import Router from '../../utils/router';
@@ -26,6 +25,7 @@ interface ListPageProps {
         timestamp: string;
         unread?: string;
         active?: boolean;
+        chatData?: ChatData;
         onContactClick?: () => void;
     }>;
     onSend?: (_message: string) => void;
@@ -51,7 +51,7 @@ export class ListPage extends Block<ListPageProps> {
             showActionDialogUser: false,
             contacts: [],
             currentChat: null,
-            showNoChatSelected: false,
+            showNoChatSelected: true,
             showNoMessages: false
         });
         this.router = new Router();
@@ -64,44 +64,24 @@ export class ListPage extends Block<ListPageProps> {
 
     private updateChatList(chats: ChatData[]) {
         const currentChatId = store.getState().currentChat?.id;
-        const contacts = chats.map(chat => ({
-            id: chat.id,
-            avatar: chat.avatar || 'avatar.png',
-            name: chat.title,
-            preview: chat.last_message?.content || 'Нет сообщений',
-            timestamp: chat.last_message?.time || '',
-            unread: chat.unread_count > 0 ? String(chat.unread_count) : undefined,
-            active: chat.id === currentChatId,
-            onContactClick: () => {
-                console.log('Вызов onContactClick по клику', chat.id);
-                this.handleChatClick(chat);
-            }
-        }));
-        this.setProps({ contacts });
-
-        console.log('Component props updated:', {
-            contacts: contacts.length,
-            currentChat: !!currentChatId,
-            showNoChatSelected: this.props.showNoChatSelected,
-            showNoMessages: this.props.showNoMessages
+        this.setProps({
+            contacts: chats.map(chat => ({
+                id: chat.id,
+                avatar: chat.avatar || 'avatar.png',
+                name: chat.title,
+                preview: chat.last_message?.content || 'Нет сообщений',
+                timestamp: chat.last_message?.time || '',
+                unread: chat.unread_count > 0 ? String(chat.unread_count) : undefined,
+                active: chat.id === currentChatId,
+                chatData: chat
+            }))
         });
+
+        // Вызываем рендер списка после обновления пропсов
+        this.renderContacts();
     }
 
-    private handleDocumentClick = (e: Event) => {
-        const target = e.target as HTMLElement;
-        if (!target.closest('.chat-header__actions-dialog') && !target.closest('.dots-button__settings')) {
-            this.setProps({ showActionDialogUser: false });
-        }
-        if (!target.closest('.message__actions-dialog') && !target.closest('.message-input__attach-btn')) {
-            this.setProps({ showActionDialogMessage: false });
-        }
-        if (!target.closest('.dialog-container')) {
-            this.setProps({ showDialog: false });
-        }
-    };
-
     private updateActiveChat(chat: ChatData) {
-        console.log('Updating active chat:', chat.title);
         this.setProps({
             currentChat: chat,
             showNoChatSelected: false
@@ -114,53 +94,45 @@ export class ListPage extends Block<ListPageProps> {
         if (chatAvatar) {
             chatAvatar.setAttribute('src', chat.avatar || 'avatar.png');
         }
-        this.updateChatList(store.getState().chats || []);
     }
 
     componentDidMount() {
-        document.addEventListener('click', this.handleDocumentClick);
         this.setProps({ showDialog: false });
-        console.log('ListPage mounted');
+
+        // Обработчик клика вне диалога
+        document.addEventListener('click', this.handleOutsideClick);
 
         store.on('changed', () => {
             const state = store.getState();
-            console.log('Store changed:', {
-                chats: state.chats?.length,
-                currentChat: state.currentChat,
-                messages: Object.keys(state.messages || {}).length
-            });
-            if (state.chats) {
-                this.updateChatList(state.chats);
-            }
             if (state.currentChat) {
                 this.updateActiveChat(state.currentChat);
+            }
+            if (state.chats) {
+                this.updateChatList(state.chats);
             }
         });
 
         chatsController.getChats().then(() => {
-            console.log('Initial chats loaded');
             const currentChat = store.getState().currentChat;
             if (currentChat) {
-                console.log('Selecting initial chat:', currentChat.id);
                 chatsController.selectChat(currentChat);
             }
         });
-        setTimeout(() => {
-            const contacts = this.getContent()?.querySelectorAll('[data-contact-id]');
-            console.log('Found contact elements:', contacts);
-            if (contacts) {
-                contacts.forEach(contact => {
-                    contact.addEventListener('click', (_e) => {
-                        console.log('Ручной обработчик click по contacts сработал');
-                    });
-                });
-            }
-        }, 1000);
     }
 
+    private handleOutsideClick = (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        const isButton = target.closest('.dots-button__settings');
+        const isDialog = target.closest('.chat-header__actions-dialog');
+
+        if (!isButton && !isDialog) {
+            this.setProps({ showActionDialogUser: false });
+        }
+        this.renderContacts();
+    };
+
     componentWillUnmount() {
-        console.log('ListPage unmounted');
-        document.removeEventListener('click', this.handleDocumentClick);
+        document.removeEventListener('click', this.handleOutsideClick.bind(this));
         store.off('changed', this.updateChatList);
     }
 
@@ -179,12 +151,17 @@ export class ListPage extends Block<ListPageProps> {
                 buttonText
             });
         }
+        this.renderContacts();
         return true;
     }
 
     private async handleUserAction(login: string, action: 'add' | 'remove') {
         const chatId = store.getState().currentChat?.id;
-        if (!chatId) return;
+        if (!chatId) {
+            alert('Чат не выбран');
+            return;
+        }
+        // Поиск пользователя по логину
         const user = await userController.searchUser(login);
         if (user) {
             if (action === 'add') {
@@ -200,20 +177,45 @@ export class ListPage extends Block<ListPageProps> {
         }
     }
 
+    public renderContacts() {
+        const contactsContainer = this.getContent()?.querySelector('.chat__contacts');
+        if (!contactsContainer) return;
+
+        contactsContainer.innerHTML = '';
+
+        this.props.contacts?.forEach(contact => {
+            const contactItem = new ContactItem({
+                id: contact.id,
+                avatar: contact.avatar,
+                name: contact.name,
+                preview: contact.preview,
+                timestamp: contact.timestamp,
+                unread: contact.unread,
+                active: contact.active,
+                onContactClick: () => {
+                    if (contact.chatData) {
+                        this.handleChatClick(contact.chatData);
+                    }
+                }
+            });
+
+            const content = contactItem.getContent();
+            if (content) {
+                contactsContainer.appendChild(content);
+            }
+        });
+    }
+
     init() {
-        // Создаём один экземпляр ContactItem как шаблон
-        // Он будет использоваться Handlebars для рендера каждого элемента
-        this.children.ContactItem = new ContactItem({
-            // Можно передать пустые данные — они будут заменены при рендере
-            id: 0,
-            avatar: 'avatar.png',
-            name: 'Загрузка...',
-            preview: '...',
-            timestamp: '',
-            onContactClick: () => {}
+
+        this.children.dotsSettingsButton = new DotsSettingsButton({
+            onClick: (e: Event) => {
+                e.stopPropagation();
+                this.setProps({ showActionDialogUser: !this.props.showActionDialogUser });
+                this.renderContacts();
+            }
         });
 
-        // Остальные компоненты
         this.children.actionDialogUser = new ActionDialogUser({
             onAddUser: () => {
                 this.setProps({
@@ -221,6 +223,8 @@ export class ListPage extends Block<ListPageProps> {
                     dialogType: 'add',
                     showActionDialogUser: false
                 });
+
+                this.renderContacts();
             },
             onRemoveUser: () => {
                 this.setProps({
@@ -228,17 +232,22 @@ export class ListPage extends Block<ListPageProps> {
                     dialogType: 'remove',
                     showActionDialogUser: false
                 });
+                this.renderContacts();
             }
         });
 
         this.children.userActionDialog = new ChangingDialog({
             dialogTitle: 'Добавить пользователя',
             buttonText: 'Добавить',
-            onClose: () => this.setProps({ showDialog: false }),
+            onClose: () => {
+                this.setProps({ showDialog: false })
+                this.renderContacts();
+            },
             onSubmit: async (login: string) => {
                 if (this.props.dialogType) {
                     this.handleUserAction(login, this.props.dialogType);
                 }
+                this.renderContacts();
             }
         });
 
@@ -259,22 +268,15 @@ export class ListPage extends Block<ListPageProps> {
             type: 'button',
             style: 'primary',
             events: {
-                click: (e: Event) => {
+                click: async (e: Event) => {
                     e.preventDefault();
                     const title = prompt('Введите название чата:');
                     if (title) {
-                        chatsController.createChat(title)
-                            .then(() => {
-                                chatsController.getChats().then(chats => {
-                                    const newChat = chats.find(chat => chat.title === title);
-                                    if (newChat) {
-                                        chatsController.selectChat(newChat);
-                                    }
-                                });
-                            })
-                            .catch(error => {
-                                console.error('Ошибка при создании чата:', error);
-                            });
+                        try {
+                            await chatsController.createChat(title);
+                        } catch (error) {
+                            console.error('Ошибка при создании чата:', error);
+                        }
                     }
                 }
             }
@@ -349,24 +351,6 @@ export class ListPage extends Block<ListPageProps> {
             }
         });
 
-        // Общие события для всего компонента (настройки, прикрепить)
-        this.setProps({
-            events: {
-                click: (e: Event) => {
-                    const target = e.target as HTMLElement;
-                    if (target.closest('.dots-button__settings')) {
-                        this.setProps({
-                            showActionDialogUser: !this.props.showActionDialogUser
-                        });
-                    }
-                    if (target.closest('.message-input__attach-btn')) {
-                        this.setProps({
-                            showActionDialogMessage: !this.props.showActionDialogMessage
-                        });
-                    }
-                }
-            }
-        });
     }
 
     protected render(): DocumentFragment {

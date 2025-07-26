@@ -11,14 +11,20 @@ export class ChatsAPI extends BaseAPI {
     }
 
     addUser(data: { chatId: number, userId: number }) {
-        return this.http.put('/users', { data });
+        return this.http.put('/chats/users', {
+            users: [data.userId],
+            chatId: data.chatId
+        });
     }
 
     deleteUser(data: { chatId: number, userId: number }) {
-        return this.http.delete('/users', { data });
+        return this.http.delete('/chats/users', {
+            users: [data.userId],
+            chatId: data.chatId
+        });
     }
 
     getToken(chatId: number) {
-        return this.http.post(`/token/${chatId}`);
+        return this.http.post(`/chats/token/${chatId}`);
     }
 }

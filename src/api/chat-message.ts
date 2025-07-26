@@ -4,6 +4,6 @@ import { MessageData } from '../utils/types';
 export class ChatMessagesAPI extends BaseAPI {
 
     getMessages(chatId: string): Promise<MessageData[]> {
-        return this.http.get<MessageData[]>(`/${chatId}`);
+        return this.http.get<MessageData[]>(`/chats/${chatId}/common`);
     }
 }

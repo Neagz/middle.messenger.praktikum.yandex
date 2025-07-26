@@ -2,6 +2,7 @@ import { ChatsAPI } from '../api/chats';
 import { store } from '../core/store';
 import Router from '../utils/router';
 import { ChatData, TokenResponse  } from '../utils/types';
+import {messageController} from "./index";
 
 export class ChatsController {
     private api: ChatsAPI;
@@ -81,11 +82,24 @@ export class ChatsController {
         }
     }
 
-    selectChat(chat: ChatData) {
-        store.set({
-            currentChat: chat,
-            messages: {} // Очищаем сообщения при смене чата
-        });
+    async selectChat(chat: ChatData) {
+        try {
+            // Сохраняем выбранный чат в store
+            store.set({
+                currentChat: chat,
+                messages: store.getState().messages // Сохраняем существующие сообщения
+            });
+
+            // Получаем токен для WebSocket
+            const token = await this.getToken(chat.id);
+            if (token) {
+                // Подключаемся к WebSocket
+                messageController.connect(chat.id, token);
+            }
+        } catch (e: any) {
+            console.error('Select chat error:', e);
+            store.set({ error: e.reason || 'Failed to select chat' });
+        }
     }
 }
 

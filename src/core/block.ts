@@ -27,10 +27,15 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
     props: P & BaseBlockProps; // Объединение специфичных и базовых пропсов
     private _eventBus: EventBus;
     public children: BlockChildren = {};
+    protected lists: P & BaseBlockProps;
 
-    constructor(props: P & BaseBlockProps = {} as P & BaseBlockProps) {
+    constructor(
+        props: P & BaseBlockProps = {} as P & BaseBlockProps,
+        lists: P & BaseBlockProps = {} as P & BaseBlockProps
+    ) {
         this._eventBus = new EventBus();
         this.props = this._makePropsProxy({ ...props }) as P & BaseBlockProps;
+        this.lists = this._makePropsProxy({ ...lists }) as P & BaseBlockProps;
         this._registerEvents(this._eventBus);
         this._eventBus.emit(Block.EVENTS.INIT);
     }
@@ -85,6 +90,14 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
         Object.assign(this.props, nextProps);
     };
 
+    setLists = (nextList: Partial<P & BaseBlockProps>) => {
+        if (!nextList) {
+            return;
+        }
+
+        Object.assign(this.lists, nextList);
+    };
+
     private _render() {
         // Удаляем обработчики со старого элемента
         this._removeEvents();
@@ -121,15 +134,6 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
                 (newActiveElement as HTMLElement).focus();
             }
         }
-
-        const { events = {} } = this.props;
-
-        Object.entries(events).forEach(([event, listener]) => {
-            if (typeof listener === 'function') {
-                // Добавляем обработчик на корневой элемент
-                this._element?.addEventListener(event, listener as EventListener);
-            }
-        });
     }
 
     protected render(): DocumentFragment {
@@ -160,30 +164,34 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
 
     // Удаляем всех обработчиков событий
     private _removeEvents() {
-        const { events = {} } = this.props;
-        if (this._element) {
-            Object.entries(events).forEach(([event, listener]) => {
-                if (typeof listener === 'function') {
-                    this._element!.removeEventListener(event, listener);
-                }
-            });
-        }
+        this._eventListeners.forEach(({ event, element, listener }) => {
+            element.removeEventListener(event, listener);
+        });
+        this._eventListeners = [];
     }
+
     private _addEvents() {
         const { events = {} } = this.props;
 
+        // Удаляем только обработчики, связанные с текущим элементом
         this._removeEvents();
+        if (!this._element) return;
+
         // Добавляем обработчики с проверкой
         Object.entries(events).forEach(([event, listener]) => {
             if (typeof listener === 'function') {
                 // Привязываем контекст и сохраняем ссылку на обработчик
                 const boundListener = (e: Event) => {
-                    console.log(`Событие ${event} сработало на ${this.constructor.name}`);
+                    e.stopPropagation(); // Добавляем stopPropagation по умолчанию
+                    //console.log(`Событие ${event} сработало на ${this.constructor.name}`);
                     listener.call(this, e); // Явная привязка контекста
                 };
-                (this._element as HTMLElement).addEventListener(event, boundListener);
-                // Сохраняем для последующего удаления
-                this._eventListeners.push({ event, listener: boundListener });
+                this._element!.addEventListener(event, boundListener);
+                this._eventListeners.push({
+                    event,
+                    element: this._element!,
+                    listener: boundListener
+                });
             }
         });
     }
@@ -206,15 +214,11 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
     }
 
     // Добавляем массив для хранения обработчиков
-    private _eventListeners: { event: string; listener: EventListener }[] = [];
+    private _eventListeners: { event: string; element: HTMLElement; listener: EventListener }[] = [];
 
     // Метод для полной очистки
     public destroy() {
         this._removeEvents();
-        if (this._element) {
-            this._element.remove();
-            this._element = null;
-        }
 
         // Рекурсивно уничтожаем дочерние компоненты
         Object.values(this.children).forEach(child => {
@@ -224,5 +228,10 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
                 child.destroy();
             }
         });
+
+        if (this._element) {
+            this._element.remove();
+            this._element = null;
+        }
     }
 }

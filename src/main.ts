@@ -85,15 +85,15 @@ Object.entries(Components).forEach(([componentName, ComponentClass]) => {
 });
 
 // Глобальная навигация по кликам
-document.addEventListener('click', (e) => {
-  const target = e.target as HTMLElement;
-  const link = target.closest('a[href^="/"]');
-
-  if (link) {
-    e.preventDefault();
-    router.go(link.getAttribute('href')!);
-  }
-});
+// document.addEventListener('click', (e) => {
+//   const target = e.target as HTMLElement;
+//   const link = target.closest('a[href^="/"]');
+//
+//   if (link) {
+//     e.preventDefault();
+//     router.go(link.getAttribute('href')!);
+//   }
+// });
 
 /**
 // Навигация между страницами
