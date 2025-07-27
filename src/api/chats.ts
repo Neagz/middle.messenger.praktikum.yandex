@@ -1,4 +1,5 @@
 import { BaseAPI } from './base-api';
+import {UserData} from "../utils/types";
 
 export class ChatsAPI extends BaseAPI {
 
@@ -30,5 +31,12 @@ export class ChatsAPI extends BaseAPI {
 
     getToken(chatId: number) {
         return this.http.post(`/chats/token/${chatId}`);
+    }
+
+    searchUser(login: string): Promise<UserData[]> {
+        return this.http.post<UserData[]>('/user/search', { login });
+    }
+    updateChatAvatar(chatId: number, avatar: FormData): Promise<unknown> {
+        return this.http.put(`/chats/${chatId}/avatar`, avatar);
     }
 }

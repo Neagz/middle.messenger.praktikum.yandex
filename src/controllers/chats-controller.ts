@@ -1,7 +1,7 @@
 import { ChatsAPI } from '../api/chats';
 import { store } from '../core/store';
 import Router from '../utils/router';
-import { ChatData, TokenResponse } from '../utils/types';
+import {ChatData, TokenResponse, UserData} from '../utils/types';
 import { messageController } from "./index";
 
 export class ChatsController {
@@ -120,6 +120,28 @@ export class ChatsController {
         } catch (e: unknown) {
             const errorMessage = e instanceof Error ? e.message : 'Failed to select chat';
             console.error('Select chat error:', errorMessage);
+            store.set({ error: errorMessage });
+        }
+    }
+
+    async searchUsers(login: string): Promise<UserData[]> {
+        try {
+            return await this.api.searchUser(login) as UserData[];
+        } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Failed to search users';
+            console.error('Search users error:', errorMessage);
+            store.set({ error: errorMessage });
+            return [];
+        }
+    }
+
+    async updateChatAvatar(chatId: number, avatar: FormData): Promise<void> {
+        try {
+            await this.api.updateChatAvatar(chatId, avatar);
+            await this.getChats();
+        } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Failed to update chat avatar';
+            console.error('Update chat avatar error:', errorMessage);
             store.set({ error: errorMessage });
         }
     }

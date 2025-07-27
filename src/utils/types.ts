@@ -103,6 +103,6 @@ export interface IChatsController {
     setRouter(_router: Router): void;
 
     // Дополнительные методы
-    searchUsers(_login: string): Promise<UserData[]>;
-    updateChatAvatar(_chatId: number, _avatar: FormData): Promise<void>;
+    searchUsers?(_login: string): Promise<UserData[]>;
+    updateChatAvatar?(_chatId: number, _avatar: FormData): Promise<void>;
 }
