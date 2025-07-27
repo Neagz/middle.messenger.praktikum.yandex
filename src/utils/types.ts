@@ -65,13 +65,13 @@ export interface ChatData {
 }
 
 export interface MessageData {
-    id: number;
-    user_id: number;
-    chat_id: number;
+    id?: number;
+    user_id?: number;
+    chat_id?: number;
     time: string;
     content: string;
-    is_read: boolean;
-    type?: 'message' | 'file' | 'image';
+    is_read?: boolean;
+    type?: 'message' | 'file' | 'image' | 'incoming' | 'outgoing';
     file?: {
         url: string;
         name: string;

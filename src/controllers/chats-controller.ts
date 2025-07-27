@@ -51,6 +51,18 @@ export class ChatsController {
         }
     }
 
+    async deleteChat(chatId: number) {
+        try {
+            await this.api.deleteChat(chatId);
+            await this.getChats(); // Обновляем список чатов после удаления
+            store.set({ error: null });
+        } catch (e: any) {
+            console.error('Delete chat error:', e);
+            store.set({ error: e.reason || 'Failed to delete chat' });
+            throw e; // Пробрасываем ошибку дальше
+        }
+    }
+
     async addUserToChat(chatId: number, userId: number) {
         try {
             await this.api.addUser({ chatId, userId });
@@ -84,16 +96,18 @@ export class ChatsController {
 
     async selectChat(chat: ChatData) {
         try {
-            // Сохраняем выбранный чат в store
+            const updatedChats = store.getState().chats.map(c =>
+                c.id === chat.id ? { ...c, unread_count: 0 } : c
+            );
+
             store.set({
                 currentChat: chat,
-                messages: store.getState().messages // Сохраняем существующие сообщения
+                chats: updatedChats,
+                messages: store.getState().messages
             });
 
-            // Получаем токен для WebSocket
             const token = await this.getToken(chat.id);
             if (token) {
-                // Подключаемся к WebSocket
                 messageController.connect(chat.id, token);
             }
         } catch (e: any) {

@@ -10,6 +10,10 @@ export class ChatsAPI extends BaseAPI {
         return this.http.post('/chats', { title });
     }
 
+    deleteChat(chatId: number) {
+        return this.http.delete('/chats', { chatId });
+    }
+
     addUser(data: { chatId: number, userId: number }) {
         return this.http.put('/chats/users', {
             users: [data.userId],

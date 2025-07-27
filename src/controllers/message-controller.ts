@@ -14,7 +14,7 @@ export class MessageController {
     public async connect(chatId: number, token: string) {
         try {
             this.currentChatId = chatId;
-            console.log(`Connecting to chat ${chatId} with token`, token);
+            console.log(`Подключение к чату ${chatId}, token:`, token);
 
             // Закрываем предыдущее соединение
             this.closeConnection();
@@ -27,16 +27,16 @@ export class MessageController {
             this.socket = new WebSocket(`wss://ya-praktikum.tech/ws/chats/${userId}/${chatId}/${token}`);
 
             this.socket.addEventListener('open', () => {
-                console.log('WebSocket connection established for chat', chatId);
+                console.log('WebSocket соединение установлено с чатом:', chatId);
                 this.getOldMessages();
             });
 
             this.socket.addEventListener('close', (event) => {
-                console.log(`WebSocket closed for chat ${chatId}`, event);
+                console.log(`WebSocket выход из чата: ${chatId}`, event);
             });
 
             this.socket.addEventListener('message', (event) => {
-                console.log('WebSocket message received:', event.data);
+                console.log('WebSocket получены сообщения:', event.data);
                 const data = JSON.parse(event.data);
                 if (Array.isArray(data)) {
                     this.handleOldMessages(chatId, data);
@@ -46,11 +46,11 @@ export class MessageController {
             });
 
             this.socket.addEventListener('error', (event) => {
-                console.error('WebSocket error:', event);
+                console.error('WebSocket ошибка:', event);
             });
 
         } catch (e: any) {
-            console.error('WebSocket connect error:', e);
+            console.error('WebSocket ошибка подключения:', e);
             store.set({ error: e.message || 'Failed to connect to chat' });
         }
     }
@@ -62,12 +62,12 @@ export class MessageController {
                 this.handleOldMessages(Number(chatId), messages);
             }
         } catch (e) {
-            console.error('Failed to load initial messages:', e);
+            console.error('Не удалось загрузить исходные сообщения:', e);
         }
     }
     private getOldMessages() {
         if (this.socket) {
-            console.log('Requesting old messages');
+            console.log('Запрос старых сообщений');
             this.socket.send(JSON.stringify({
                 content: '0',
                 type: 'get old'
@@ -76,8 +76,19 @@ export class MessageController {
     }
 
     private handleOldMessages(chatId: number, messages: MessageData[]) {
-        console.log(`Received ${messages.length} old messages for chat ${chatId}`, messages);
-        const reversedMessages = [...messages].reverse();
+        console.log(`Получено ${messages.length} старых сообщений ${chatId}`, messages);
+
+        // Преобразуем сообщения, гарантируя наличие обязательных полей
+        const processedMessages = messages.map(msg => ({
+            ...msg,
+            id: msg.id || 0, // или другое значение по умолчанию
+            user_id: msg.user_id || 0,
+            chat_id: msg.chat_id || 0,
+            is_read: msg.is_read || false
+        }));
+
+        const reversedMessages = [...processedMessages].reverse();
+
         store.set({
             messages: {
                 ...store.getState().messages,
@@ -87,19 +98,54 @@ export class MessageController {
     }
 
     private handleNewMessage(chatId: number, message: MessageData) {
-        console.log('New message received:', message);
+        console.log('Получено новое сообщение:', message);
+
+        // Преобразуем новое сообщение
+        const processedMessage = {
+            ...message,
+            id: message.id || Date.now(), // или другая генерация ID
+            user_id: message.user_id || 0,
+            chat_id: message.chat_id || chatId,
+            is_read: message.is_read || false
+        };
+
         const currentMessages = store.getState().messages[chatId] || [];
+
         store.set({
             messages: {
                 ...store.getState().messages,
-                [chatId]: [...currentMessages, message]
+                [chatId]: [...currentMessages, processedMessage]
             }
         });
+
+        this.updateChatLastMessage(chatId, processedMessage);
+    }
+
+    private async updateChatLastMessage(chatId: number, message: MessageData) {
+        const chats = [...(store.getState().chats || [])];
+        const chatIndex = chats.findIndex(c => c.id === chatId);
+
+        if (chatIndex >= 0) {
+            const user = store.getState().user; // Получаем текущего пользователя
+            if (!user) return;
+
+            const updatedChats = [...chats];
+            updatedChats[chatIndex] = {
+                ...updatedChats[chatIndex],
+                last_message: {
+                    user, // Добавляем пользователя
+                    content: message.content,
+                    time: message.time
+                }
+            };
+
+            store.set({ chats: updatedChats });
+        }
     }
 
     public sendMessage(content: string) {
         if (this.socket) {
-            console.log('Sending message:', content);
+            console.log('Отправка сообщения:', content);
             this.socket.send(JSON.stringify({
                 content,
                 type: 'message'
@@ -109,7 +155,7 @@ export class MessageController {
 
     public closeConnection() {
         if (this.socket) {
-            console.log('Closing WebSocket connection for chat', this.currentChatId);
+            console.log('Закрыто WebSocket соединение с чатом', this.currentChatId);
             this.socket.close();
             this.socket = null;
             this.currentChatId = null;

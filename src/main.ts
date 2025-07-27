@@ -82,6 +82,25 @@ Object.entries(Components).forEach(([componentName, ComponentClass]) => {
   Handlebars.registerHelper('eq', function(a, b, options) {
     return a === b ? options.fn(this) : options.inverse(this);
   });
+  Handlebars.registerHelper('formatTimeOrEmpty', function(timestamp) {
+    // Если timestamp отсутствует, пустая строка или null/undefined
+    if (!timestamp) return '';
+
+    try {
+      const date = new Date(timestamp);
+
+      // Проверка, что дата валидна
+      if (isNaN(date.getTime())) return '';
+
+      // Форматирование в ЧЧ:ММ с ведущими нулями
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+
+      return `${hours}:${minutes}`;
+    } catch (e) {
+      return ''; // В случае ошибки возвращаем пустую строку
+    }
+  });
 });
 
 // Глобальная навигация по кликам

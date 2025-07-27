@@ -229,6 +229,11 @@ footer {
   color: var(--color-bg-primary);
 }
 
+.btn__danger {
+  background: var(--color-danger-light);
+  color: white;
+}
+
 .form-item__error {
   margin-top: 7px;
   font-weight: 400;
@@ -312,13 +317,18 @@ footer {
 
 .chat {
   display: flex;
-  height: 100%;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .chat__sidebar {
   width: 310px;
   border-right: 1px solid var(--color-divider);
   padding: 21px 10px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .chat__main {
@@ -327,6 +337,7 @@ footer {
   flex: 1;
   height: 100%;
   padding: 10px 20px;
+  overflow: hidden;
 }
 
 .chat__profile {
@@ -334,8 +345,51 @@ footer {
   margin-bottom: 23px;
 }
 
-.chat__search {
-  padding-bottom: 14px;
+.chat__actions {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding: 0 10px;
+}
+
+.btn__action-add {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  font-size: 20px;
+  transition: all 0.2s;
+  position: relative;
+  background-color: var(--color-border-focus);
+  color: white;
+}
+
+.btn__action-remove {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  font-size: 20px;
+  transition: all 0.2s;
+  position: relative;
+  background-color: var(--color-danger-light);
+  color: white;
+}
+
+.btn__action-add:hover {
+  transform: scale(1.1);
+}
+
+.btn__action-remove:hover {
+  transform: scale(1.1);
 }
 
 .form-item__input--search {
@@ -355,20 +409,43 @@ footer {
   color: var(--color-text-muted);
 }
 
+.chat__contacts {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 5px;
+  margin-left: calc(0px - 10px);
+  margin-right: calc(0px - 10px);
+}
+
+/* Стилизация скроллбара */
+.chat__contacts::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat__contacts::-webkit-scrollbar-track {
+  background: var(--color-bg-input);
+}
+
+.chat__contacts::-webkit-scrollbar-thumb {
+  background: var(--color-text-muted);
+  border-radius: 2px;
+}
+
 .contact-item {
   display: flex;
   height: 72px;
   border-top: 1px solid var(--color-divider);
   padding-top: 12px;
   padding-bottom: 12px;
+  padding-left: 10px;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .contact-item:hover {
   height: 72px;
-  width: calc(100% + 20px);
-  margin-left: -10px;
+  width: calc(100% + 10px);
   padding: 10px 10px;
   background-color: rgba(0, 0, 0, 0.05);
 }
@@ -441,10 +518,6 @@ footer {
   align-items: flex-end;
 }
 
-.contact-item__time {
-  position: absolute;
-}
-
 .contact-item__time-stamp {
   font-size: 9px;
   font-weight: 500;
@@ -497,12 +570,15 @@ footer {
 }
 
 .chat-header {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--color-divider);
   padding-bottom: 10px;
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .chat-header__user {
@@ -553,8 +629,12 @@ footer {
 }
 
 .chat__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
 .dialog {
@@ -642,7 +722,7 @@ footer {
 
 .dialog__time--incoming {
   position: absolute;
-  width: 23px;
+  width: 30px;
   height: 9px;
   font-size: 9px;
   font-weight: 500;
@@ -692,6 +772,7 @@ footer {
   border-top-left-radius: 0;
   background-color: var(--color-text-incoming);
   position: relative;
+  padding-right: 50px;
 }
 
 .dialog--image {
@@ -708,14 +789,23 @@ footer {
   margin-left: auto;
   background-color: var(--color-text-outgoing);
   border-bottom-right-radius: 0;
+  padding-right: 50px;
 }
 
 .message-input {
   border-top: 1px solid var(--color-divider);
+  flex-shrink: 0;
   padding: 11px 0 1px;
   display: flex;
   margin-top: auto;
   align-items: center;
+  width: 100%;
+}
+
+.chat__message-form {
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 
 .message {
@@ -729,6 +819,14 @@ footer {
   font-weight: 500;
   outline: none;
   resize: none;
+}
+
+.no-messages {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: 20px;
+  font-size: 14px;
+  margin-top: 50px;
 }
 
 .message::placeholder {
@@ -807,6 +905,7 @@ footer {
   width: 100%;
   position: fixed;
   top: 0;
+  z-index: 1000;
 }
 
 .dialog-container__remove{
@@ -818,6 +917,7 @@ footer {
   transform: translate(-50%, -50%);
   min-width: 340px;
   padding: 40px;
+  z-index: 1001;
 }
 
 .dialog__title {

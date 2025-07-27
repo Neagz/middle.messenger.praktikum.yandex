@@ -10,11 +10,13 @@ interface MessageProps {
     errorText?: string;
     validateRule?: ValidationRule;
     class?: string;
+    onEnter?: () => void;
+    [key: string]: unknown;
 }
 
-export class Message extends Block {
+export class Message extends Block<MessageProps> {
     private inputRef: HTMLInputElement | null = null;
-    private currentValue: string;
+    public currentValue: string = '';
 
     constructor(props: MessageProps) {
         super({
@@ -26,20 +28,38 @@ export class Message extends Block {
             ) => {
                 return oldProps.error !== newProps.error ||
                     oldProps.class !== newProps.class;
-            }
+            },
         });
 
         this.currentValue = props.value || '';
 
     }
     init() {
-        // Создаем обработчики один раз при инициализации
         this.setProps({
             events: {
                 input: this.handleInput.bind(this),
-                blur: this.handleBlur.bind(this)
+                blur: this.handleBlur.bind(this),
+                keydown: this.handleKeyDown.bind(this)
             }
         });
+    }
+
+    public clear() {
+        this.currentValue = '';
+        if (this.inputRef) {
+            this.inputRef.value = '';
+        }
+        this.setProps({ value: '' });
+    }
+
+    private handleKeyDown(e: Event) {
+        const keyboardEvent = e as KeyboardEvent;
+        if (keyboardEvent.key === 'Enter' && typeof this.props.onEnter === 'function') {
+            keyboardEvent.preventDefault();
+            if (typeof this.props.onEnter === 'function') {
+                this.props.onEnter();
+            }
+        }
     }
 
     private handleInput(e: Event) {

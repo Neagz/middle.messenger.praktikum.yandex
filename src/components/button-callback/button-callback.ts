@@ -4,11 +4,11 @@ import template from './button-callback.hbs?raw';
 interface ButtonCallbackProps {
     name?: string;
     title?: string;
-    type?: string;
+    type?: 'button' | 'submit' | 'reset';
     class: string;
     content?: string;
     events?: {
-        click: (_e: Event) => void;
+        click?: (_e: Event) => void;
     };
 }
 
@@ -18,10 +18,11 @@ export class ButtonCallback extends Block {
             ...props,
             events: {
                 click: (e: Event) => {
-                    e.stopPropagation(); // Важно: останавливаем всплытие
+                    e.preventDefault();
+                    e.stopPropagation();
                     props.events?.click?.(e);
-                }
-            }
+                },
+            },
         });
     }
 

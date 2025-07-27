@@ -6,13 +6,12 @@ import {
     Input,
     Message,
     Link,
-    Dialog,
     ChangingDialog,
-    ContactItem, DotsSettingsButton, ActionDialogUser
+    ContactItem, DotsSettingsButton, ActionDialogUser, DotsSelectButton, ActionDialogMessage
 } from '../../components';
 import { ValidationRule } from '../../utils/validation';
 import Router from '../../utils/router';
-import { chatsController, userController } from '../../controllers';
+import {chatsController, messageController, userController} from '../../controllers';
 import { store } from '../../core/store';
 import { ChatData, MessageData } from '../../utils/types';
 
@@ -49,10 +48,11 @@ export class ListPage extends Block<ListPageProps> {
             showDialog: false,
             dialogType: undefined,
             showActionDialogUser: false,
+            showActionDialogMessage: false,
             contacts: [],
             currentChat: null,
             showNoChatSelected: true,
-            showNoMessages: false
+            showNoMessages: false,
         });
         this.router = new Router();
     }
@@ -61,6 +61,30 @@ export class ListPage extends Block<ListPageProps> {
         console.log('Выбран чат:', chat.id, chat.title);
         chatsController.selectChat(chat);
     };
+
+    private async handleSubmit(e: Event) {
+        e.preventDefault();
+        await this.handleSendMessage();
+    }
+
+    private async handleSendMessage() {
+        const messageInput = this.children.inputMessage as Message;
+        const message = messageInput.getValue().trim();
+
+        if (!message || !store.getState().currentChat?.id) {
+            console.error('Не выбран чат или сообщение пустое');
+            return;
+        }
+
+        try {
+            await messageController.sendMessage(message);
+
+            messageInput.clear();
+
+        } catch (error) {
+            console.error('Ошибка при отправке сообщения:', error);
+        }
+    }
 
     private updateChatList(chats: ChatData[]) {
         const currentChatId = store.getState().currentChat?.id;
@@ -96,6 +120,31 @@ export class ListPage extends Block<ListPageProps> {
         }
     }
 
+    private autoscroll() {
+        requestAnimationFrame(() => {
+            const container = this.getContent()?.querySelector('.chat__messages');
+            if (!container) return;
+
+            container.scrollTop = container.scrollHeight;
+        });
+    }
+
+    private updateMessagesState() {
+        const { currentChat, messages, user } = store.getState();
+        const chatMessages = currentChat?.id ? messages?.[currentChat.id] : null;
+
+        this.setProps({
+            showNoMessages: !chatMessages || chatMessages.length === 0,
+            messages: chatMessages?.map(msg => ({
+                ...msg,
+                type: msg.user_id === user?.id ? 'outgoing' : 'incoming'
+            })) || []
+        });
+
+        this.autoscroll();
+        this.renderContacts();
+    }
+
     componentDidMount() {
         this.setProps({ showDialog: false });
 
@@ -110,7 +159,10 @@ export class ListPage extends Block<ListPageProps> {
             if (state.chats) {
                 this.updateChatList(state.chats);
             }
+            this.updateMessagesState();
         });
+
+        this.updateMessagesState();
 
         chatsController.getChats().then(() => {
             const currentChat = store.getState().currentChat;
@@ -122,12 +174,14 @@ export class ListPage extends Block<ListPageProps> {
 
     private handleOutsideClick = (e: MouseEvent) => {
         const target = e.target as HTMLElement;
-        const isButton = target.closest('.dots-button__settings');
-        const isDialog = target.closest('.chat-header__actions-dialog');
+        const isButton = target.closest('.dots-button__settings') || target.closest('.message-input__attach-btn');
+        const isDialog = target.closest('.chat-header__actions-dialog') || target.closest('.message__actions-dialog');
 
         if (!isButton && !isDialog) {
             this.setProps({ showActionDialogUser: false });
+            this.setProps({ showActionDialogMessage: false });
         }
+        this.autoscroll();
         this.renderContacts();
     };
 
@@ -151,6 +205,7 @@ export class ListPage extends Block<ListPageProps> {
                 buttonText
             });
         }
+        this.autoscroll();
         this.renderContacts();
         return true;
     }
@@ -210,9 +265,36 @@ export class ListPage extends Block<ListPageProps> {
 
         this.children.dotsSettingsButton = new DotsSettingsButton({
             onClick: (e: Event) => {
+                e.preventDefault();
                 e.stopPropagation();
                 this.setProps({ showActionDialogUser: !this.props.showActionDialogUser });
+                this.autoscroll();
                 this.renderContacts();
+            }
+        });
+
+        this.children.selectButton = new DotsSelectButton({
+            onClick: (e: Event) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.setProps({ showActionDialogMessage: !this.props.showActionDialogMessage });
+                this.autoscroll();
+                this.renderContacts();
+            }
+        });
+
+        this.children.actionDialogMessage = new ActionDialogMessage({
+            onSelectPhoto: () => {
+                console.log('Фото или видео выбрано');
+                this.setProps({ showActionDialogMessage: false });
+            },
+            onSelectFile: () => {
+                console.log('Файл выбран');
+                this.setProps({ showActionDialogMessage: false });
+            },
+            onSelectLocation: () => {
+                console.log('Локация выбрана');
+                this.setProps({ showActionDialogMessage: false });
             }
         });
 
@@ -264,9 +346,9 @@ export class ListPage extends Block<ListPageProps> {
         });
 
         this.children.createChatButton = new Button({
-            name: 'Создать чат',
+            name: '+',
             type: 'button',
-            style: 'primary',
+            style: 'action-add',
             events: {
                 click: async (e: Event) => {
                     e.preventDefault();
@@ -276,6 +358,38 @@ export class ListPage extends Block<ListPageProps> {
                             await chatsController.createChat(title);
                         } catch (error) {
                             console.error('Ошибка при создании чата:', error);
+                        }
+                    }
+                }
+            }
+        });
+
+        this.children.deleteChatButton = new Button({
+            name: '-',
+            type: 'button',
+            style: 'action-remove',
+            events: {
+                click: async (e: Event) => {
+                    e.preventDefault();
+                    const currentChat = store.getState().currentChat;
+                    if (!currentChat) {
+                        alert('Выберите чат для удаления');
+                        return;
+                    }
+
+                    if (confirm(`Вы уверены, что хотите удалить чат "${currentChat.title}"?`)) {
+                        try {
+                            await chatsController.deleteChat(currentChat.id);
+                            await chatsController.getChats();
+                            store.set({
+                                currentChat: null
+                            });
+                            this.setProps({
+                                showNoChatSelected: true
+                            });
+                        } catch (error) {
+                            console.error('Ошибка при удалении чата:', error);
+                            alert('Не удалось удалить чат');
                         }
                     }
                 }
@@ -292,6 +406,7 @@ export class ListPage extends Block<ListPageProps> {
             validateRule: 'search' as ValidationRule
         });
 
+        /**
         this.children.dialogIncoming1 = new Dialog({
             type: 'incoming',
             content: 'Привет! Смотри, тут всплыл интересный кусок лунной космической истории — НАСА в какой-то момент попросила Хассельблад адаптировать модель SWC для полетов на Луну. Сейчас мы все знаем что астронавты летали с моделью 500 EL — и к слову говоря, все тушки этих камер все еще находятся на поверхности Луны, так как астронавты с собой забрали только кассеты с пленкой.',
@@ -316,13 +431,15 @@ export class ListPage extends Block<ListPageProps> {
             content: 'Круто!',
             time: '12:00'
         });
+        **/
 
         this.children.inputMessage = new Message({
             id: 'message',
             placeholder: 'Сообщение',
             name: 'message',
             validateRule: 'message' as ValidationRule,
-            errorText: 'Сообщение не должно быть пустым'
+            errorText: 'Сообщение не должно быть пустым',
+            onEnter: this.handleSendMessage.bind(this),
         });
 
         this.children.sendButton = new ButtonCallback({
@@ -338,19 +455,11 @@ export class ListPage extends Block<ListPageProps> {
             `,
             events: {
                 click: (e: Event) => {
-                    console.log('Кнопка отправки нажата');
                     e.preventDefault();
-                    const messageComponent = this.children.inputMessage as Message;
-                    const isValid = messageComponent.validate();
-                    if (isValid) {
-                        const message = messageComponent.getValue();
-                        this.props.onSend?.(message);
-                        messageComponent.setValue('');
-                    }
+                    this.handleSubmit(e);
                 }
-            }
+            },
         });
-
     }
 
     protected render(): DocumentFragment {

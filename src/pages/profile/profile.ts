@@ -21,6 +21,10 @@ export class ProfilePage extends Block {
         const user = store.getState().user;
         super({
             ...props,
+            user: {
+                ...user,
+                display_name: user?.display_name || `${user?.first_name} ${user?.second_name}`.trim()
+            },
             errors: {},
             labelEmail: "Почта",
             labelLogin: "Логин",
