@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import { resolve } from 'path'
 
 export default defineConfig({
+    base: '/',
     assetsInclude: ['**/*.hbs'], // Явно указываем, что .hbs - это ассеты
     resolve: {
         alias: {
