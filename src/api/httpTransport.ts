@@ -4,12 +4,14 @@ type PlainObject = Record<string, unknown>;
 type RequestData = PlainObject | FormData;
 
 // Перечисление HTTP методов
+/* eslint-disable no-unused-vars */
 enum HTTPMethod {
     GET = 'GET',
     POST = 'POST',
     PUT = 'PUT',
     DELETE = 'DELETE'
 }
+/* eslint-enable no-unused-vars */
 
 // Класс для выполнения HTTP-запросов
 class HTTPTransport {

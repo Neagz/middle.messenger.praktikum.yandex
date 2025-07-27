@@ -1,3 +1,5 @@
+import Router from "./router";
+
 export interface UserData {
     id: number;
     first_name: string;
@@ -81,4 +83,26 @@ export interface MessageData {
 
 export interface TokenResponse {
     token: string;
+}
+
+export interface IChatsController {
+    // Основные методы работы с чатами
+    getChats(): Promise<ChatData[]>;
+    createChat(_title: string): Promise<void>;
+    deleteChat(_chatId: number): Promise<void>;
+
+    // Методы работы с пользователями чата
+    addUserToChat(_chatId: number, _userId: number): Promise<void>;
+    removeUserFromChat(_chatId: number, _userId: number): Promise<void>;
+
+    // Методы работы с WebSocket
+    getToken(_chatId: number): Promise<string | null>;
+    selectChat(_chat: ChatData): Promise<void>;
+
+    // Настройки роутера
+    setRouter(_router: Router): void;
+
+    // Дополнительные методы
+    searchUsers(_login: string): Promise<UserData[]>;
+    updateChatAvatar(_chatId: number, _avatar: FormData): Promise<void>;
 }

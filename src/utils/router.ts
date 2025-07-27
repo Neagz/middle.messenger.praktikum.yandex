@@ -1,6 +1,7 @@
 import Route from './route';
 import { authController } from '../controllers/auth-controller';
 import { store } from "../core/store";
+import { Block } from '../core/block';
 
 // Главный класс роутера (Singleton)
 export default class Router {
@@ -24,7 +25,11 @@ export default class Router {
     }
 
     // Регистрация маршрута
-    use(pathname: string, block: any, props: { context?: Record<string, unknown> } = {}) {
+    use<P extends Record<string, unknown>>(
+        pathname: string,
+        block: new (_props: P) => Block<P>,
+        props: { context?: P } = {}
+    ) {
         const route = new Route(pathname, block, {
             rootQuery: this._rootQuery,
             context: props.context
@@ -53,10 +58,11 @@ export default class Router {
                 return true;
             }
             return false;
-        } catch (e) {
+        } catch {
             return false;
         }
     }
+
     // Обработка перехода на маршрут
     private async _onRoute(pathname: string) {
         const isAuth = await this.checkAuth();

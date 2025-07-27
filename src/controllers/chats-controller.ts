@@ -1,8 +1,8 @@
 import { ChatsAPI } from '../api/chats';
 import { store } from '../core/store';
 import Router from '../utils/router';
-import { ChatData, TokenResponse  } from '../utils/types';
-import {messageController} from "./index";
+import { ChatData, TokenResponse } from '../utils/types';
+import { messageController } from "./index";
 
 export class ChatsController {
     private api: ChatsAPI;
@@ -12,74 +12,80 @@ export class ChatsController {
         this.api = new ChatsAPI();
     }
 
-    setRouter(router: Router) {
+    setRouter(router: Router): void {
         this.router = router;
     }
 
-    private checkRouter() {
+    private checkRouter(): void {
         if (!this.router) {
             throw new Error('Router not initialized');
         }
     }
 
-    async getChats() {
+    async getChats(): Promise<ChatData[]> {
         try {
-            const chats = await this.api.getChats() as ChatData[]; // Явное приведение типа
+            const chats = await this.api.getChats() as ChatData[];
             store.set({
                 chats,
                 error: null
             });
             return chats;
-        } catch (e: any) {
-            console.error('Get chats error:', e);
+        } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Failed to get chats';
+            console.error('Get chats error:', errorMessage);
             store.set({
-                error: e.reason || 'Failed to get chats',
-                chats: [] // Устанавливаем пустой массив при ошибке
+                error: errorMessage,
+                chats: []
             });
             return [];
         }
     }
-    async createChat(title: string) {
+
+    async createChat(title: string): Promise<void> {
         try {
             await this.api.createChat(title);
-            await this.getChats(); // Обновляем список чатов после создания
+            await this.getChats();
             this.checkRouter();
             this.router!.go('/messenger');
-        } catch (e: any) {
-            console.error('Create chat error:', e);
-            store.set({ error: e.reason || 'Failed to create chat' });
+        } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Failed to create chat';
+            console.error('Create chat error:', errorMessage);
+            store.set({ error: errorMessage });
         }
     }
 
-    async deleteChat(chatId: number) {
+    async deleteChat(chatId: number): Promise<void> {
         try {
             await this.api.deleteChat(chatId);
-            await this.getChats(); // Обновляем список чатов после удаления
+            await this.getChats();
             store.set({ error: null });
-        } catch (e: any) {
-            console.error('Delete chat error:', e);
-            store.set({ error: e.reason || 'Failed to delete chat' });
-            throw e; // Пробрасываем ошибку дальше
+        } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Failed to delete chat';
+            console.error('Delete chat error:', errorMessage);
+            store.set({ error: errorMessage });
+            throw e;
         }
     }
 
-    async addUserToChat(chatId: number, userId: number) {
+    async addUserToChat(chatId: number, userId: number): Promise<void> {
         try {
             await this.api.addUser({ chatId, userId });
             store.set({ error: null });
-        } catch (e: any) {
-            console.error('Add user error:', e);
-            store.set({ error: e.reason || 'Failed to add user to chat' });
+        } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Failed to add user to chat';
+            console.error('Add user error:', errorMessage);
+            store.set({ error: errorMessage });
         }
     }
 
-    async removeUserFromChat(chatId: number, userId: number) {
+    async removeUserFromChat(chatId: number, userId: number): Promise<void> {
         try {
             await this.api.deleteUser({ chatId, userId });
             store.set({ error: null });
-        } catch (e: any) {
-            console.error('Remove user error:', e);
-            store.set({ error: e.reason || 'Failed to remove user from chat' });
+        } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Failed to remove user from chat';
+            console.error('Remove user error:', errorMessage);
+            store.set({ error: errorMessage });
         }
     }
 
@@ -87,14 +93,15 @@ export class ChatsController {
         try {
             const response = await this.api.getToken(chatId) as TokenResponse;
             return response.token;
-        } catch (e: any) {
-            console.error('Get token error:', e);
-            store.set({ error: e.reason || 'Failed to get chat token' });
+        } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Failed to get chat token';
+            console.error('Get token error:', errorMessage);
+            store.set({ error: errorMessage });
             return null;
         }
     }
 
-    async selectChat(chat: ChatData) {
+    async selectChat(chat: ChatData): Promise<void> {
         try {
             const updatedChats = store.getState().chats.map(c =>
                 c.id === chat.id ? { ...c, unread_count: 0 } : c
@@ -110,9 +117,10 @@ export class ChatsController {
             if (token) {
                 messageController.connect(chat.id, token);
             }
-        } catch (e: any) {
-            console.error('Select chat error:', e);
-            store.set({ error: e.reason || 'Failed to select chat' });
+        } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Failed to select chat';
+            console.error('Select chat error:', errorMessage);
+            store.set({ error: errorMessage });
         }
     }
 }

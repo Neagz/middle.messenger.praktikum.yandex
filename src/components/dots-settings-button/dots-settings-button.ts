@@ -2,7 +2,7 @@ import { Block } from '../../core/block';
 import template from './dots-settings-button.hbs?raw';
 
 interface DotsSettingsButtonProps {
-    onClick?: (e: Event) => void;
+    onClick?: (_e: Event) => void;
     [key: string]: unknown;
 }
 

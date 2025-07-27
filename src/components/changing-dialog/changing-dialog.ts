@@ -7,7 +7,7 @@ interface ChangingDialogProps {
     dialogTitle: string;
     buttonText: string;
     onClose: () => void;
-    onSubmit: (login: string) => Promise<void>;
+    onSubmit: (_login: string) => Promise<void>;
     [key: string]: unknown;
 }
 

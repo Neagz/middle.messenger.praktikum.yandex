@@ -2,7 +2,7 @@ import { Block } from '../../core/block';
 import template from './dots-select-button.hbs?raw';
 
 interface DotsSelectButtonProps {
-    onClick?: (e: Event) => void;
+    onClick?: (_e: Event) => void;
     [key: string]: unknown;
 }
 

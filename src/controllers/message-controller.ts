@@ -49,9 +49,10 @@ export class MessageController {
                 console.error('WebSocket ошибка:', event);
             });
 
-        } catch (e: any) {
-            console.error('WebSocket ошибка подключения:', e);
-            store.set({ error: e.message || 'Failed to connect to chat' });
+        } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Failed to connect to chat';
+            console.error('WebSocket ошибка подключения:', errorMessage);
+            store.set({ error: errorMessage });
         }
     }
 

@@ -411,8 +411,7 @@ footer {
 
 .chat__contacts {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden auto;
   padding-right: 5px;
   margin-left: calc(0px - 10px);
   margin-right: calc(0px - 10px);
@@ -446,8 +445,8 @@ footer {
 .contact-item:hover {
   height: 72px;
   width: calc(100% + 10px);
-  padding: 10px 10px;
-  background-color: rgba(0, 0, 0, 0.05);
+  padding: 10px;
+  background-color: rgb(0 0 0 / 5%);
 }
 
 .contact-item__active {
@@ -608,7 +607,7 @@ footer {
 }
 
 .dots-button__settings:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgb(0 0 0 / 5%);
 }
 
 .dots-button__settings span {
@@ -1001,7 +1000,7 @@ footer {
 
 .message__actions:hover {
   border-radius: 15px;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgb(0 0 0 / 5%);
 }
 
 .message__actions-dialog {

@@ -1,9 +1,11 @@
+import { Block } from '../core/block';
+
 export type Indexed<T = unknown> = {
     [_key in string]: T;
 };
 
 // renderDOM
-export function render(query: string, block: any) {
+export function render(query: string, block: Block) {
     const root = document.querySelector(query);
     if (root) {
         root.innerHTML = '';
@@ -206,16 +208,19 @@ export function cloneDeep<T extends object = object>(obj: T): T {
 }
 
 // queryStringify
-type StringIndexed = Record<string, any>;
+type QueryValue =
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | QueryValue[]
+    | {[key: string]: QueryValue};
 
-export function queryStringify(data: StringIndexed): string | never {
-    if (typeof data !== 'object' || data === null) {
-        throw new Error('Input must be an object');
-    }
-
+export function queryStringify(data: {[key: string]: QueryValue}): string {
     const pairs: string[] = [];
 
-    const processValue = (currentKey: string, value: any): void => {
+    const processValue = (currentKey: string, value: QueryValue): void => {
         if (value === null || value === undefined) {
             pairs.push(`${encodeURIComponent(currentKey)}=`);
             return;
@@ -230,12 +235,16 @@ export function queryStringify(data: StringIndexed): string | never {
                 });
             }
         } else if (typeof value === 'object') {
-            const keys = Object.keys(value);
+            const objValue = value as {[key: string]: QueryValue};
+            const keys = Object.keys(objValue);
             if (keys.length === 0) {
                 pairs.push(`${encodeURIComponent(currentKey)}={}`);
             } else {
                 keys.forEach(key => {
-                    processValue(`${currentKey}[${encodeURIComponent(key)}]`, value[key]);
+                    processValue(
+                        `${currentKey}[${encodeURIComponent(key)}]`,
+                        objValue[key]
+                    );
                 });
             }
         } else {
@@ -248,7 +257,7 @@ export function queryStringify(data: StringIndexed): string | never {
     };
 
     Object.keys(data).forEach(key => {
-        processValue(encodeURIComponent(key), data[key]);
+        processValue(key, data[key]);
     });
 
     return pairs.join('&');

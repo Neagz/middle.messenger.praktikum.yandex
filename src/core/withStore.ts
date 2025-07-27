@@ -1,18 +1,18 @@
 import { Block } from '../core/block';
 import { store } from '../core/store';
 
-interface AppState {
-}
-
-export function withStore<P extends Record<string, unknown>>(WrappedBlock: new (props: P) => Block<P>, mapStateToProps: (state: AppState) => Partial<P>) {
+export function withStore<P extends Record<string, unknown>>(
+    WrappedBlock: new (_props: P) => Block<P>,
+    mapStateToProps: (_state: typeof store extends { getState(): infer S } ? S : never) => Partial<P>
+) {
     return class extends WrappedBlock {
         private onChangeStoreCallback: () => void;
 
         constructor(props: P) {
-            const state = store.getState();
-            const mappedProps = mapStateToProps(state);
+            const _state = store.getState();
+            const mappedProps = mapStateToProps(_state);
 
-            super({ ...props, ...mappedProps, ...mapStateToProps(store.getState()) });
+            super({ ...props, ...mappedProps });
 
             this.onChangeStoreCallback = () => {
                 const newState = store.getState();

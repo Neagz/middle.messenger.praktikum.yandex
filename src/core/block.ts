@@ -15,6 +15,10 @@ export type BaseBlockProps = {
 // Тип для дочерних компонентов
 type BlockChildren = Record<string, Block | Block[]>;
 
+interface ChildComponent {
+    saveState?: () => unknown;
+    restoreState?: (_state: unknown) => void;
+}
 export class Block<P extends Record<string, unknown> = Record<string, unknown>> {
     static EVENTS = {
         INIT: "init",
@@ -82,7 +86,7 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
         }
     }
 
-    protected componentDidUpdate(_oldProps?: P, _newProps?: P): boolean {
+    protected componentDidUpdate(): boolean {
         return true;
     }
 
@@ -105,7 +109,7 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
         // Сохраняем состояние компонентов
         const states = Object.entries(this.children).map(([key, child]) => ({
             key,
-            state: (child as any).saveState?.()
+            state: (child as ChildComponent).saveState?.()
         }));
 
         const fragment = this.render();
@@ -122,7 +126,7 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
 
         // Восстанавливаем состояние
         states.forEach(({ key, state }) => {
-            (this.children[key] as any)?.restoreState?.(state);
+            (this.children[key] as ChildComponent)?.restoreState?.(state);
         });
 
         this._addEvents();

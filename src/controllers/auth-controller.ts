@@ -1,14 +1,14 @@
 import { AuthAPI } from '../api/auth';
 import { store } from '../core/store';
 import Router from '../utils/router';
-import { UserData, ISignUpData, ISignInData } from '../utils/types';
+import { UserData, ISignUpData, ISignInData, IChatsController  } from '../utils/types';
 
 export class AuthController {
     private api: AuthAPI;
     private router: Router | null = null;
-    private chatsController?: any;
+    private chatsController: IChatsController | undefined;
 
-    setChatsController(controller: any) {
+    setChatsController(controller: IChatsController): void {
         this.chatsController = controller;
     }
 
@@ -16,17 +16,17 @@ export class AuthController {
         this.api = new AuthAPI();
     }
 
-    setRouter(router: Router) {
+    setRouter(router: Router): void {
         this.router = router;
     }
 
-    private checkRouter() {
+    private checkRouter(): void {
         if (!this.router) {
             throw new Error('Router not initialized');
         }
     }
 
-    async signUp(data: ISignUpData) {
+    async signUp(data: ISignUpData): Promise<void> {
         try {
             await this.api.signUp(data);
             const user = await this.signIn({
@@ -39,9 +39,11 @@ export class AuthController {
                 this.checkRouter();
                 this.router!.go('/messenger'); // Используем переданный router
             }
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error('SignUp error:', e);
-            store.set({ error: e.reason || 'Registration failed' });
+            store.set({
+                error: e instanceof Error ? e.message : 'Registration failed'
+            });
         }
     }
 
@@ -63,25 +65,29 @@ export class AuthController {
                 return user;
             }
             return null;
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error('SignIn error:', e);
-            store.set({ error: e.reason || 'Authorization failed' });
+            store.set({
+                error: e instanceof Error ? e.message : 'Authorization failed'
+            });
             return null;
         }
     }
-    async logout() {
+    async logout(): Promise<void> {
         try {
             await this.api.logout();
             store.set({ user: null, error: null });
             this.checkRouter();
             this.router!.go('/');
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error('Logout error:', e);
-            store.set({ error: e.reason || 'Logout failed' });
+            store.set({
+                error: e instanceof Error ? e.message : 'Logout failed'
+            });
         }
     }
 
-    async fetchUser() {
+    async fetchUser(): Promise<UserData | null> {
         try {
             const response = await this.api.getUser();
             if (!response) {
@@ -103,8 +109,8 @@ export class AuthController {
             console.log("Данные пользователя:", user);
             store.set({ user, error: null });
             return user; // Возвращаем данные пользователя
-        } catch (e: any) {
-            if (e.message === 'Unauthorized') {
+        } catch (e: unknown) {
+            if (e instanceof Error && e.message === 'Unauthorized') {
                 store.set({ user: null });
             }
             throw e;

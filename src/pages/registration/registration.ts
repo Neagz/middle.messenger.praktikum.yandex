@@ -121,9 +121,12 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
                     }
                 }
 
-                catch (error: any) {
+                catch (error: unknown) {
                     console.error('Registration error:', error);
-                    this.setProps({ errors: { form: error.reason || 'Ошибка регистрации' } });
+                    const errorMessage = error instanceof Error
+                        ? error.message
+                        : 'Ошибка регистрации';
+                    this.setProps({ errors: { form: errorMessage } });
                 }
 
                 finally {

@@ -14,7 +14,8 @@ interface ContactItemProps {
     [key: string]: unknown;
 }
 
-export class ContactItem extends Block {
+export class ContactItem extends Block<ContactItemProps> {
+    private _prevProps: ContactItemProps;
     constructor(props: ContactItemProps) {
         super({
             ...props,
@@ -28,7 +29,9 @@ export class ContactItem extends Block {
         });
     }
 
-    protected componentDidUpdate(oldProps: ContactItemProps, newProps: ContactItemProps): boolean {
+    protected componentDidUpdate(): boolean {
+        const oldProps = this._prevProps as ContactItemProps;
+        const newProps = this.props as ContactItemProps;
         // Если изменилось только active или unread - обновляем вручную
         if (oldProps.active !== newProps.active || oldProps.unread !== newProps.unread) {
             const element = this.getContent();

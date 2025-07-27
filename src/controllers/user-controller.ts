@@ -94,9 +94,15 @@ export class UserController {
                 };
             }
             return null;
-        } catch (e: any) {
-            console.error('User search error:', e);
-            store.set({ error: e.reason || 'User search failed' });
+        } catch (e: unknown) {
+            const errorMessage = e instanceof Error
+                ? e.message
+                : typeof e === 'object' && e !== null && 'reason' in e
+                    ? String((e as { reason: unknown }).reason)
+                    : 'User search failed';
+
+            console.error('User search error:', errorMessage);
+            store.set({ error: errorMessage });
             return null;
         }
     }

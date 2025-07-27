@@ -2,45 +2,6 @@ import EventBus from './eventBus';
 import { cloneDeep } from '../utils/helpers';
 
 // Определяем тип состояния
-interface AppState {
-    user: UserData | null;
-    chats: ChatData[];
-    currentChat: ChatData | null;
-    messages: Record<number, MessageData[]>;
-    error: string | null;
-}
-
-type Dispatch = (nextStateOrAction: Partial<AppState> | Action, payload?: any) => void;
-type Action = (dispatch: Dispatch, state: AppState, payload: any) => void;
-
-export class Store extends EventBus {
-    private state: AppState;
-
-    constructor(defaultState: AppState) {
-        super();
-        this.state = defaultState;
-    }
-
-    public getState(): AppState {
-        return this.state;
-    }
-
-    public set(nextState: Partial<AppState>): void {
-        const prevState = cloneDeep(this.state);
-        this.state = { ...this.state, ...nextState };
-        this.emit('changed', prevState, nextState);
-    }
-
-    dispatch(nextStateOrAction: Partial<AppState> | Action, payload?: any) {
-        if (typeof nextStateOrAction === 'function') {
-            nextStateOrAction(this.dispatch.bind(this), this.state, payload);
-        } else {
-            this.set({ ...this.state, ...nextStateOrAction });
-        }
-    }
-}
-
-// Интерфейсы для типизации состояния
 interface UserData {
     id: number;
     first_name: string;
@@ -50,14 +11,6 @@ interface UserData {
     email: string;
     phone: string;
     avatar: string;
-}
-
-interface AppState {
-    user: UserData | null;
-    chats: ChatData[]; // Убрали undefined, так как всегда инициализируем массивом
-    currentChat: ChatData | null;
-    messages: Record<number, MessageData[]>;
-    error: string | null;
 }
 
 interface ChatData {
@@ -79,6 +32,46 @@ interface MessageData {
     time: string;
     content: string;
     is_read: boolean;
+}
+
+interface AppState {
+    user: UserData | null;
+    chats: ChatData[];
+    currentChat: ChatData | null;
+    messages: Record<number, MessageData[]>;
+    error: string | null;
+}
+
+type Dispatch<T = unknown> = (_nextStateOrAction: Partial<AppState> | Action<T>, _payload?: T) => void;
+type Action<T = unknown> = (_dispatch: Dispatch<T>, _state: AppState, _payload: T) => void;
+
+export class Store extends EventBus {
+    private state: AppState;
+
+    constructor(defaultState: AppState) {
+        super();
+        this.state = defaultState;
+    }
+
+    public getState(): AppState {
+        return this.state;
+    }
+
+    public set(nextState: Partial<AppState>): void {
+        const prevState = cloneDeep(this.state);
+        this.state = { ...this.state, ...nextState };
+        this.emit('changed', prevState, nextState);
+    }
+
+    dispatch<T>(nextStateOrAction: Partial<AppState> | Action<T>, payload?: T): void {
+        if (typeof nextStateOrAction === 'function') {
+            // Добавляем проверку на undefined и приводим тип
+            const actionPayload = payload !== undefined ? payload : null as unknown as T;
+            nextStateOrAction(this.dispatch.bind(this), this.state, actionPayload);
+        } else {
+            this.set({ ...this.state, ...nextStateOrAction });
+        }
+    }
 }
 
 // Инициализация хранилища
