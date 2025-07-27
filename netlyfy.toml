@@ -2,7 +2,32 @@
 command = "npm run build"
 publish = "dist"
 
+# Основное правило для SPA: все запросы → index.html
 [[redirects]]
-from = "/"
+from = "/*"
 to = "/index.html"
 status = 200
+force = true  # Важно: перезаписывает любые существующие файлы
+conditions = {Role = ["*"]}  # Применяется для всех пользователей
+
+# Исключение для API-эндпоинтов (если есть)
+[[redirects]]
+from = "/api/*"
+to = "https://ya-praktikum.tech/api/v2/:splat"  # Пример для вашего API
+status = 200
+headers = {X-Forwarded-Proto = "https"}
+
+# Исключение для статических файлов (CSS/JS/изображения)
+[[redirects]]
+from = "/assets/*"
+to = "/assets/:splat"
+status = 200
+force = false  # Не перезаписывать реальные файлы
+
+# Резервный редирект для 404 ошибок (на случай, если index.html недоступен)
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 404
+force = false
+conditions = {Status = "404"}
