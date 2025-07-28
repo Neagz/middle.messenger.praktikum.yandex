@@ -5,6 +5,7 @@ import { ValidationRule, validationRules } from '../../utils/validation';
 import Router from '../../utils/router';
 import { userController } from "../../controllers";
 import { store } from "../../core/store";
+import {API_V2_RESOURCES} from "../../config";
 
 interface ProfilePasswordPageProps {
     currentAvatar?: string;
@@ -119,7 +120,7 @@ export class ProfilePasswordPage extends Block<ProfilePasswordPageProps> {
         avatarElement.classList.add('avatar-input__default-icon', newClass);
 
         if (user?.avatar) {
-            avatarElement.style.backgroundImage = `url(https://ya-praktikum.tech/api/v2/resources${user.avatar})`;
+            avatarElement.style.backgroundImage = `url("${API_V2_RESOURCES}${user.avatar}")`;
             avatarElement.style.backgroundSize = 'cover';
         }
     }

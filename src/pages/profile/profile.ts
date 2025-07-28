@@ -4,6 +4,7 @@ import { Input, Link } from '../../components';
 import Router from '../../utils/router';
 import { authController } from "../../controllers";
 import { store } from "../../core/store";
+import { API_V2_RESOURCES } from '../../config';
 
 interface ProfileProps {
     title?: string;
@@ -72,7 +73,7 @@ export class ProfilePage extends Block {
         avatarElement.classList.add('avatar-input__default-icon');
 
         if (user?.avatar) {
-            avatarElement.style.backgroundImage = `url(https://ya-praktikum.tech/api/v2/resources${user.avatar})`;
+            avatarElement.style.backgroundImage = `url("${API_V2_RESOURCES}${user.avatar}")`;
             avatarElement.style.backgroundSize = 'cover';
             avatarElement.style.borderRadius = '50%';
         } else {

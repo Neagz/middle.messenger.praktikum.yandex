@@ -1,6 +1,7 @@
 import { ChatMessagesAPI } from '../api/chat-message';
 import { store } from '../core/store';
 import { MessageData } from '../utils/types';
+import { API_BASE_URL } from '../config';
 
 export class MessageController {
     private api: ChatMessagesAPI;
@@ -24,7 +25,7 @@ export class MessageController {
             const userId = store.getState().user?.id;
             if (!userId) return;
 
-            this.socket = new WebSocket(`wss://ya-praktikum.tech/ws/chats/${userId}/${chatId}/${token}`);
+            this.socket = new WebSocket(`${API_BASE_URL.replace('https', 'wss')}/ws/chats/${userId}/${chatId}/${token}`);
 
             this.socket.addEventListener('open', () => {
                 console.log('WebSocket соединение установлено с чатом:', chatId);
