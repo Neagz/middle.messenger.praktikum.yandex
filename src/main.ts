@@ -4,7 +4,7 @@ import * as Components from './components';
 import Router from './utils/router';
 import {authController, chatsController, userController} from './controllers';
 import {LoginPage, RegistrationPage, ProfilePage, ListPage, Page404, Page500, ProfileEditPage, ProfilePasswordPage} from './pages';
-
+/* eslint-disable no-unused-vars */
 export enum Routes {
   SignIn = '/',
   SignUp = '/sign-up',
@@ -15,34 +15,11 @@ export enum Routes {
   Error404 = '/404',
   Error500 = '/500',
 }
+/* eslint-enable no-unused-vars */
 interface HelperContext {
   name: string;
   value: number;
 }
-// Тип для конфигурации страницы
-// type PageConfig = {
-//   template: new (_props: Record<string, unknown>) => Block; // Упрощенный тип конструктора
-//   context?: Record<string, unknown>;
-// };
-
-// Конфигурация страниц
-// const pagesConfig: Record<string, PageConfig> = {
-//   test_page: { template: Pages.TestPage },
-//   login: { template: Pages.LoginPage },
-//   registration: { template: Pages.RegistrationPage },
-//   nav: { template: Pages.NavigatePage },
-//   '500': { template: Pages.Page500 },
-//   '404': { template: Pages.Page404 },
-//   profile: { template: Pages.ProfilePage },
-//   profile_edit: { template: Pages.ProfileEditPage },
-//   profile_password: { template: Pages.ProfilePasswordPage },
-//   list: {
-//     template: Pages.ListPage,
-//     context: {
-//       contacts: [],
-//     }
-//   }
-// };
 
 // Регистрация маршрутов
 const router = new Router('#app');
@@ -101,74 +78,3 @@ Object.entries(Components).forEach(([componentName, ComponentClass]) => {
     }
   });
 });
-
-// Глобальная навигация по кликам
-// document.addEventListener('click', (e) => {
-//   const target = e.target as HTMLElement;
-//   const link = target.closest('a[href^="/"]');
-//
-//   if (link) {
-//     e.preventDefault();
-//     router.go(link.getAttribute('href')!);
-//   }
-// });
-
-/**
-// Навигация между страницами
-function navigate(page: string) {
-  const config = pagesConfig[page] || pagesConfig['404']; // Конфиг или 404
-  const container = document.getElementById('app'); // Контейнер приложения
-
-  if (!container) return console.error('Контейнер #app не найден');
-
-  try {
-    const pageInstance = new config.template(config.context || {}); // Создание страницы
-    const content = pageInstance.getContent(); // Получение контента
-    if (content) {
-      container.innerHTML = '';
-      container.appendChild(content); // Вставка в DOM
-      pageInstance.dispatchComponentDidMount(); // Инициирование монтирования
-    }
-  } catch (e) {
-    console.error(`Ошибка при рендеринге страницы ${page}:`, e);
-    if (page !== '500') navigate('500'); // Переход на страницу ошибки
-  }
-}
-
-// Инициализация приложения
-function init() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const page = urlParams.get('page') || 'nav'; // Страница из URL или nav
-  navigate(page);
-}
-
-// Глобальная навигация по кликам
-document.addEventListener('click', (e) => {
-  // Проверяем, что цель события является HTMLElement
-  if (!(e.target instanceof HTMLElement)) {
-    return;
-  }
-
-  const target = e.target;
-
-  // Ищем ближайший элемент с атрибутом 'page'
-  const pageElement = target.closest('[page]');
-
-  if (pageElement && pageElement instanceof HTMLElement) {
-    const page = pageElement.getAttribute('page');
-
-    if (page) {
-      navigate(page); // Переход
-      e.preventDefault(); // Отмена стандартного поведения
-      e.stopPropagation(); // Остановка всплытия
-    }
-  }
-});
-
-// Запуск при загрузке DOM
-document.addEventListener('DOMContentLoaded', init);
-
-// Экспорт навигации в глобальную область
-declare global { interface Window { navigate: (_page: string) => void; } }
-window.navigate = navigate;
- */
