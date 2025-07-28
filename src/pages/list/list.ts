@@ -69,20 +69,28 @@ export class ListPage extends Block<ListPageProps> {
 
     private async handleSendMessage() {
         const messageInput = this.children.inputMessage as Message;
+        if (!messageInput) return;
+
         const message = messageInput.getValue().trim();
 
-        if (!message || !store.getState().currentChat?.id) {
-            console.error('Не выбран чат или сообщение пустое');
+        if (!message) {
+            messageInput.setProps({
+                error: "Сообщение не может быть пустым",
+                class: "message--error"
+            });
+            return;
+        }
+
+        if (!store.getState().currentChat?.id) {
+            console.error("Чат не выбран");
             return;
         }
 
         try {
             await messageController.sendMessage(message);
-
             messageInput.clear();
-
         } catch (error) {
-            console.error('Ошибка при отправке сообщения:', error);
+            console.error("Ошибка отправки:", error);
         }
     }
 
