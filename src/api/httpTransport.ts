@@ -3,9 +3,18 @@ import { API_V2_BASE } from '../config';
 
 type PlainObject = Record<string, unknown>;
 type RequestData = PlainObject | FormData;
-
-// Перечисление HTTP методов
 /* eslint-disable no-unused-vars */
+export enum HttpStatus {
+    Ok = 200,
+    Created = 201,
+    NoContent = 204,
+    BadRequest = 400,
+    Unauthorized = 401,
+    Forbidden = 403,
+    NotFound = 404,
+    Conflict = 409,
+    InternalServerError = 500,
+}
 enum HTTPMethod {
     GET = 'GET',
     POST = 'POST',
@@ -42,12 +51,13 @@ class HTTPTransport {
 
             // Обработчики событий
             xhr.onload = () => {
-                if (xhr.status === 401) {
+                if (xhr.status === HttpStatus.Unauthorized) {
                     store.set({ user: null });
                     reject(new Error('Unauthorized'));
                     return;
                 }
-                if (xhr.status >= 200 && xhr.status < 300) {
+
+                if (xhr.status >= HttpStatus.Ok && xhr.status < 300) {
                     resolve(xhr.response as T);
                 } else {
                     reject(new Error(xhr.response?.reason || 'Request failed'));
