@@ -17,6 +17,7 @@ interface MessageProps {
 export class Message extends Block<MessageProps> {
     private inputRef: HTMLInputElement | null = null;
     public currentValue: string = '';
+    private shouldPreserveFocus = false;
 
     constructor(props: MessageProps) {
         super({
@@ -45,11 +46,25 @@ export class Message extends Block<MessageProps> {
     }
 
     public clear() {
+        this.preserveFocus();
+        // Отключаем временно события blur при очистке
+        this.setProps({ events: {} });
+
         this.currentValue = '';
         if (this.inputRef) {
             this.inputRef.value = '';
         }
-        this.setProps({ value: '' });
+
+        // Восстанавливаем события после микротаска
+        setTimeout(() => {
+            this.setProps({
+                events: {
+                    blur: this.handleBlur.bind(this),
+                    input: this.handleInput.bind(this),
+                    keydown: this.handleKeyDown.bind(this)
+                }
+            });
+        }, 0);
     }
 
     private handleKeyDown(e: Event) {
@@ -72,7 +87,17 @@ export class Message extends Block<MessageProps> {
         }
     }
 
+    public preserveFocus() {
+        this.shouldPreserveFocus = true;
+        setTimeout(() => this.shouldPreserveFocus = false, 100);
+    }
+
+// В handleBlur:
     private handleBlur() {
+        if (this.shouldPreserveFocus) {
+            this.inputRef?.focus();
+            return;
+        }
         this.validate();
     }
 

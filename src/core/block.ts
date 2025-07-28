@@ -138,6 +138,14 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
                 (newActiveElement as HTMLElement).focus();
             }
         }
+
+        // Восстанавливаем фокус
+        if (activeElementId) {
+            setTimeout(() => {
+                const element = document.getElementById(activeElementId);
+                if (element) (element as HTMLElement).focus();
+            }, 0);
+        }
     }
 
     protected render(): DocumentFragment {
