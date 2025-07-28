@@ -5,6 +5,7 @@ import { ValidationRule, validationRules } from '../../utils/validation';
 import Router from '../../utils/router';
 import { store } from "../../core/store";
 import { userController } from "../../controllers";
+import { API_V2_RESOURCES } from "../../config";
 
 interface ProfileEditPageProps {
     errors?: Record<string, string>;
@@ -157,7 +158,7 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
         avatarElement.classList.add('avatar-input__default-icon', newClass);
 
         if (user?.avatar) {
-            avatarElement.style.backgroundImage = `url(https://ya-praktikum.tech/api/v2/resources${user.avatar})`;
+            avatarElement.style.backgroundImage = `url(${API_V2_RESOURCES}${user.avatar})`;
             avatarElement.style.backgroundSize = 'cover';
         }
     }
@@ -183,7 +184,7 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
             id: 'avatar',
             name: 'avatar',
             currentAvatar: user?.avatar
-                ? `https://ya-praktikum.tech/api/v2/resources${user.avatar}`
+                ? `${API_V2_RESOURCES}${user.avatar})`
                 : undefined
         });
 

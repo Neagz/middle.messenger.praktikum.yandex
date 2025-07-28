@@ -1,4 +1,5 @@
 import { store } from '../core/store';
+import { API_V2_BASE } from '../config';
 
 type PlainObject = Record<string, unknown>;
 type RequestData = PlainObject | FormData;
@@ -15,7 +16,7 @@ enum HTTPMethod {
 
 // Класс для выполнения HTTP-запросов
 class HTTPTransport {
-    private baseUrl: string = 'https://ya-praktikum.tech/api/v2'; // Базовый URL для всех запросов
+    private baseUrl: string = API_V2_BASE; // Базовый URL для всех запросов
 
     // Базовый метод для выполнения запросов
     private request<T>(
