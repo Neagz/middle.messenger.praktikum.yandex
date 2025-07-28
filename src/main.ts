@@ -1,40 +1,48 @@
 import Handlebars from 'handlebars';
 import './style.css';
-import * as Pages from './pages'; // Страницы
-import * as Components from './components'; // Компоненты
-import { Block } from "./core/block"; // Базовый класс
+import * as Components from './components';
 import Router from './utils/router';
 import {authController, chatsController, userController} from './controllers';
 import {LoginPage, RegistrationPage, ProfilePage, ListPage, Page404, Page500, ProfileEditPage, ProfilePasswordPage} from './pages';
 
+export enum Routes {
+  SignIn = '/',
+  SignUp = '/sign-up',
+  Messenger = '/messenger',
+  Settings = '/settings',
+  SettingsEdit = '/settings-edit',
+  SettingsPassword = '/settings-password',
+  Error404 = '/404',
+  Error500 = '/500',
+}
 interface HelperContext {
   name: string;
   value: number;
 }
 // Тип для конфигурации страницы
-type PageConfig = {
-  template: new (_props: Record<string, unknown>) => Block; // Упрощенный тип конструктора
-  context?: Record<string, unknown>;
-};
+// type PageConfig = {
+//   template: new (_props: Record<string, unknown>) => Block; // Упрощенный тип конструктора
+//   context?: Record<string, unknown>;
+// };
 
 // Конфигурация страниц
-const pagesConfig: Record<string, PageConfig> = {
-  test_page: { template: Pages.TestPage },
-  login: { template: Pages.LoginPage },
-  registration: { template: Pages.RegistrationPage },
-  nav: { template: Pages.NavigatePage },
-  '500': { template: Pages.Page500 },
-  '404': { template: Pages.Page404 },
-  profile: { template: Pages.ProfilePage },
-  profile_edit: { template: Pages.ProfileEditPage },
-  profile_password: { template: Pages.ProfilePasswordPage },
-  list: {
-    template: Pages.ListPage,
-    context: {
-      contacts: [],
-    }
-  }
-};
+// const pagesConfig: Record<string, PageConfig> = {
+//   test_page: { template: Pages.TestPage },
+//   login: { template: Pages.LoginPage },
+//   registration: { template: Pages.RegistrationPage },
+//   nav: { template: Pages.NavigatePage },
+//   '500': { template: Pages.Page500 },
+//   '404': { template: Pages.Page404 },
+//   profile: { template: Pages.ProfilePage },
+//   profile_edit: { template: Pages.ProfileEditPage },
+//   profile_password: { template: Pages.ProfilePasswordPage },
+//   list: {
+//     template: Pages.ListPage,
+//     context: {
+//       contacts: [],
+//     }
+//   }
+// };
 
 // Регистрация маршрутов
 const router = new Router('#app');
@@ -43,15 +51,16 @@ authController.setRouter(router);
 userController.setRouter(router);
 chatsController.setRouter(router);
 
+// Настройка маршрутов
 router
-    .use('/', LoginPage)
-    .use('/sign-up', RegistrationPage)
-    .use('/settings', ProfilePage)
-    .use('/settings-edit', ProfileEditPage)
-    .use('/settings-password', ProfilePasswordPage)
-    .use('/messenger', ListPage, { context: pagesConfig.list.context })
-    .use('/404', Page404)
-    .use('/500', Page500)
+    .use(Routes.SignIn, LoginPage)
+    .use(Routes.SignUp, RegistrationPage)
+    .use(Routes.Settings, ProfilePage)
+    .use(Routes.SettingsEdit, ProfileEditPage)
+    .use(Routes.SettingsPassword, ProfilePasswordPage)
+    .use(Routes.Messenger, ListPage)
+    .use(Routes.Error404, Page404)
+    .use(Routes.Error500, Page500)
     .start();
 
 // Улучшенная регистрация хелперов с поддержкой вложенного контента

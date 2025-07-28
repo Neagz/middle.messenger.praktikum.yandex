@@ -1,14 +1,9 @@
 import HTTPTransport from "./httpTransport";
 
 // Базовый класс для всех API модулей
-export class BaseAPI {
-    protected http: HTTPTransport;
+export abstract class BaseAPI {
+    protected readonly http = new HTTPTransport();
 
-    constructor() {
-        this.http = new HTTPTransport();
-    }
-
-    // Базовые CRUD методы (могут быть переопределены в дочерних классах)
     create(data: unknown): Promise<unknown> {
         return this.http.post('/', { data });
     }
