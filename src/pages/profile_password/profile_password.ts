@@ -120,7 +120,7 @@ export class ProfilePasswordPage extends Block<ProfilePasswordPageProps> {
         avatarElement.classList.add('avatar-input__default-icon', newClass);
 
         if (user?.avatar) {
-            avatarElement.style.backgroundImage = `url(${API_V2_RESOURCES}${user.avatar})`;
+            avatarElement.style.backgroundImage = `url("${API_V2_RESOURCES}${user.avatar}")`;
             avatarElement.style.backgroundSize = 'cover';
         }
     }

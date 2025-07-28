@@ -158,7 +158,7 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
         avatarElement.classList.add('avatar-input__default-icon', newClass);
 
         if (user?.avatar) {
-            avatarElement.style.backgroundImage = `url(${API_V2_RESOURCES}${user.avatar})`;
+            avatarElement.style.backgroundImage = `url("${API_V2_RESOURCES}${user.avatar}")`;
             avatarElement.style.backgroundSize = 'cover';
         }
     }
@@ -184,7 +184,7 @@ export class ProfileEditPage extends Block<ProfileEditPageProps> {
             id: 'avatar',
             name: 'avatar',
             currentAvatar: user?.avatar
-                ? `${API_V2_RESOURCES}${user.avatar})`
+                ? `url("${API_V2_RESOURCES}${user.avatar}")`
                 : undefined
         });
 

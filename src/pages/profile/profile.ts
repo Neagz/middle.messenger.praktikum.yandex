@@ -73,7 +73,7 @@ export class ProfilePage extends Block {
         avatarElement.classList.add('avatar-input__default-icon');
 
         if (user?.avatar) {
-            avatarElement.style.backgroundImage = `url(${API_V2_RESOURCES}${user.avatar})`;
+            avatarElement.style.backgroundImage = `url("${API_V2_RESOURCES}${user.avatar}")`;
             avatarElement.style.backgroundSize = 'cover';
             avatarElement.style.borderRadius = '50%';
         } else {
