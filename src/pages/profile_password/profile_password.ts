@@ -1,10 +1,14 @@
 import { Block } from '../../core/block';
 import template from './profile_password.hbs?raw';
-import { Input } from '../../components/input/input';
-import { Button } from '../../components/button/button';
-import {ValidationRule, validationRules} from '../../utils/validation';
+import {Input, Button} from '../../components';
+import { ValidationRule, validationRules } from '../../utils/validation';
+import Router from '../../utils/router';
+import { userController } from "../../controllers";
+import { store } from "../../core/store";
+import {API_V2_RESOURCES} from "../../config";
 
 interface ProfilePasswordPageProps {
+    currentAvatar?: string;
     title?: string;
     label?: string;
     id?: string;
@@ -23,10 +27,13 @@ interface ProfilePasswordPageProps {
 
 export class ProfilePasswordPage extends Block<ProfilePasswordPageProps> {
     private isSubmitting = false;
+    private router: Router;
     constructor(props: ProfilePasswordPageProps = {}) {
+        const user = store.getState().user;
         super({
             ...props,
             errors: {},
+            currentAvatar: user?.avatar || '',
             labelOldPassword: "Старый пароль",
             labelNewPassword: "Новый пароль",
             labelRepeatPassword: "Повторите новый пароль",
@@ -34,42 +41,42 @@ export class ProfilePasswordPage extends Block<ProfilePasswordPageProps> {
             idNewPassword: "newPassword",
             idRepeatPassword: "repeatPassword",
 
-            handleSubmit: (form: HTMLFormElement) => {
+            handleSubmit: async (form: HTMLFormElement) => {
                 if (this.isSubmitting) return;
                 this.isSubmitting = true;
 
                 try {
                     const formData = new FormData(form);
-                    const data = Object.fromEntries(formData.entries());
                     const errors: Record<string, string> = {};
                     let isValid = true;
 
-                    const oldPasswordValue = formData.get('oldPassword') as string;
-                    if (!validationRules.password(oldPasswordValue)) {
-                        errors.oldPassword = 'Неверный пароль';
-                        isValid = false;
-                    }
+                    // Валидация полей
+                    const validateField = (name: string, rule: ValidationRule, errorText: string) => {
+                        const value = formData.get(name) as string;
+                        if (!validationRules[rule](value)) {
+                            errors[name] = errorText;
+                            isValid = false;
+                        }
+                    };
 
-                    const newPasswordValue = formData.get('newPassword') as string;
-                    if (!validationRules.password(newPasswordValue)) {
-                        errors.newPassword = 'Неверный формат пароля';
-                        isValid = false;
-                    }
+                    validateField('oldPassword', 'password', 'Неверный пароль');
+                    validateField('newPassword', 'password', 'Неверный пароль');
 
-                    const repeatPasswordValue = formData.get('repeatPassword') as string;
-                    if (!validationRules.password(repeatPasswordValue)) {
-                        errors.repeatPassword = 'Пароли не совпадают';
-                        isValid = false;
-                    }
-
-                    this.setProps({ errors });
+                    this.setProps({errors});
 
                     if (isValid) {
-                        console.log('Данные формы:', data);
-                        window.navigate('profile');
+                        const passwordData = {
+                            oldPassword: formData.get('oldPassword') as string,
+                            newPassword: formData.get('newPassword') as string,
+                        };
+
+                        await userController.changePassword(passwordData);
+                        this.router.go('/settings');
                     }
-                }
-                finally {
+                } catch (e) {
+                    console.error("Ошибка при сохранении:", e);
+                    store.set({error: e instanceof Error ? e.message : "Ошибка обновления профиля"});
+                } finally {
                     this.isSubmitting = false;
                 }
             },
@@ -83,22 +90,53 @@ export class ProfilePasswordPage extends Block<ProfilePasswordPageProps> {
                 }
             }
         });
+
+        this.router = new Router();
+        store.on('changed', () => {
+            this.updateAvatarFromStore();
+        });
     }
 
-    handleBlur = (fieldName: string, value: string, rule: ValidationRule | undefined, errorText: string) => {
-        if (!rule) return;
+    private updateAvatarFromStore() {
+        const user = store.getState().user;
+        if (user?.avatar !== this.props.currentAvatar) {
+            this.setProps({ currentAvatar: user?.avatar });
+            this.updateAvatarDisplay();
+        }
+    }
 
-        const isValid = validationRules[rule](value);
+    private updateAvatarDisplay() {
+        const user = store.getState().user;
+        const avatarElement = this._element?.querySelector('.avatar-input__default-icon') as HTMLElement;
+
+        if (!avatarElement) return;
+
+        // Удаляем все классы и стили
+        avatarElement.className = '';
+        avatarElement.removeAttribute('style');
+
+        // Создаём новый класс
+        const newClass = user?.avatar ? 'avatar-custom' : 'avatar-default';
+        avatarElement.classList.add('avatar-input__default-icon', newClass);
+
+        if (user?.avatar) {
+            avatarElement.style.backgroundImage = `url("${API_V2_RESOURCES}${user.avatar}")`;
+            avatarElement.style.backgroundSize = 'cover';
+        }
+    }
+
+    componentDidMount() {
+        this.updateAvatarDisplay();
+    }
+
+    private handleBlur(e: Event, rule: ValidationRule, errorText: string) {
+        const target = e.target as HTMLInputElement;
+        const isValid = validationRules[rule](target.value);
         const error = isValid ? '' : errorText;
 
-        setTimeout(() => {
-            this.setProps({
-                errors: {
-                    ...this.props.errors,
-                    [fieldName]: error
-                }
-            });
-        }, 0);
+        queueMicrotask(() => ({
+            errors: { ...this.props.errors, [target.name]: error }
+        }));
     }
 
     init() {
@@ -120,20 +158,12 @@ export class ProfilePasswordPage extends Block<ProfilePasswordPageProps> {
             name: 'oldPassword',
             id: 'oldPassword',
             type: 'password',
-            value: 'Neagz111',
-            placeholder: '••••••••',
+            value: '',
+            placeholder: 'Старый пароль',
             autocomplete: 'new-password',
             validateRule: 'password' as ValidationRule,
             events: {
-                blur: (e: Event) => {
-                    const target = e.target as HTMLInputElement;
-                    this.handleBlur(
-                        target.name,
-                        target.value,
-                        'password' as ValidationRule,
-                        'Неверный пароль'
-                    );
-                }
+                blur: (e: Event) => this.handleBlur(e, 'password', 'Неверный пароль')
             }
         });
 
@@ -141,20 +171,12 @@ export class ProfilePasswordPage extends Block<ProfilePasswordPageProps> {
             name: 'newPassword',
             id: 'newPassword',
             type: 'password',
-            value: 'Neagz1111',
-            placeholder: '••••••••••',
+            value: '',
+            placeholder: 'Новый пароль',
             autocomplete: 'new-password',
             validateRule: 'password' as ValidationRule,
             events: {
-                blur: (e: Event) => {
-                    const target = e.target as HTMLInputElement;
-                    this.handleBlur(
-                        target.name,
-                        target.value,
-                        'password' as ValidationRule,
-                        'Неверный формат пароля'
-                    );
-                }
+                blur: (e: Event) => this.handleBlur(e, 'password', 'Неверный формат пароля')
             }
         });
 
@@ -162,20 +184,12 @@ export class ProfilePasswordPage extends Block<ProfilePasswordPageProps> {
             name: 'repeatPassword',
             id: 'repeatPassword',
             type: 'password',
-            value: 'Neagz1111',
-            placeholder: '••••••••••',
+            value: '',
+            placeholder: 'Повторите новый пароль',
             autocomplete: 'new-password',
             validateRule: 'password' as ValidationRule,
             events: {
-                blur: (e: Event) => {
-                    const target = e.target as HTMLInputElement;
-                    this.handleBlur(
-                        target.name,
-                        target.value,
-                        'password' as ValidationRule,
-                        'Пароли не совпадают'
-                    );
-                }
+                blur: (e: Event) => this.handleBlur(e, 'password', 'Пароли не совпадают')
             }
         });
 

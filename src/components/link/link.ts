@@ -2,7 +2,7 @@ import { Block } from '../../core/block';
 import template from './link.hbs?raw';
 
 interface LinkProps {
-    page: string;
+    page?: string;
     style: string;
     position: string;
     name: string;
@@ -24,7 +24,7 @@ export class Link extends Block {
                     props.events.click(e);
                 }
                 // Всегда выполняем навигацию
-                window.navigate(props.page);
+                // window.navigate(props.page);
             }
         };
 

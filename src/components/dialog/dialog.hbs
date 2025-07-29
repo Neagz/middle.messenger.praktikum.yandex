@@ -20,7 +20,7 @@
         {{else}}
             <p class="dialog__text">{{content}}</p>
             {{#if Multiple}}<p></p><p class="dialog__text">{{content-two}}</p>{{/if}}
-            <p class="dialog__time--incoming">{{time}}</p>
+            <p class="dialog__time--incoming">{{formatTimeOrEmpty time}}</p>
         {{/if}}
     {{/if}}
 </div>

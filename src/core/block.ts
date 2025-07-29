@@ -1,5 +1,6 @@
 import EventBus from './eventBus';
 import Handlebars from "handlebars";
+import {avatarManager} from "../services/avatar-manager";
 
 // Базовый тип для событий
 type BlockEvents = { [key: string]: ((_e: Event) => void) | undefined };
@@ -14,6 +15,10 @@ export type BaseBlockProps = {
 // Тип для дочерних компонентов
 type BlockChildren = Record<string, Block | Block[]>;
 
+interface ChildComponent {
+    saveState?: () => unknown;
+    restoreState?: (_state: unknown) => void;
+}
 export class Block<P extends Record<string, unknown> = Record<string, unknown>> {
     static EVENTS = {
         INIT: "init",
@@ -26,12 +31,29 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
     props: P & BaseBlockProps; // Объединение специфичных и базовых пропсов
     private _eventBus: EventBus;
     public children: BlockChildren = {};
+    protected lists: P & BaseBlockProps;
 
-    constructor(props: P & BaseBlockProps = {} as P & BaseBlockProps) {
+    constructor(
+        props: P & BaseBlockProps = {} as P & BaseBlockProps,
+        lists: P & BaseBlockProps = {} as P & BaseBlockProps
+    ) {
         this._eventBus = new EventBus();
         this.props = this._makePropsProxy({ ...props }) as P & BaseBlockProps;
+        this.lists = this._makePropsProxy({ ...lists }) as P & BaseBlockProps;
         this._registerEvents(this._eventBus);
         this._eventBus.emit(Block.EVENTS.INIT);
+    }
+
+    hide() {
+        if (this._element) {
+            this._element.style.display = 'none';
+        }
+    }
+
+    show() {
+        if (this._element) {
+            this._element.style.removeProperty('display');
+        }
     }
 
     private _registerEvents(eventBus: EventBus) {
@@ -64,7 +86,7 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
         }
     }
 
-    protected componentDidUpdate() {
+    protected componentDidUpdate(): boolean {
         return true;
     }
 
@@ -72,9 +94,23 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
         Object.assign(this.props, nextProps);
     };
 
+    setLists = (nextList: Partial<P & BaseBlockProps>) => {
+        if (!nextList) {
+            return;
+        }
+
+        Object.assign(this.lists, nextList);
+    };
+
     private _render() {
         // Удаляем обработчики со старого элемента
         this._removeEvents();
+
+        // Сохраняем состояние компонентов
+        const states = Object.entries(this.children).map(([key, child]) => ({
+            key,
+            state: (child as ChildComponent).saveState?.()
+        }));
 
         const fragment = this.render();
         const newElement = fragment.firstElementChild as HTMLElement;
@@ -87,13 +123,28 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
         }
 
         this._element = newElement;
+
+        // Восстанавливаем состояние
+        states.forEach(({ key, state }) => {
+            (this.children[key] as ChildComponent)?.restoreState?.(state);
+        });
+
         this._addEvents();
+        avatarManager.clear();
 
         if (activeElementId) {
             const newActiveElement = this._element.querySelector(`#${activeElementId}`);
             if (newActiveElement) {
                 (newActiveElement as HTMLElement).focus();
             }
+        }
+
+        // Восстанавливаем фокус
+        if (activeElementId) {
+            setTimeout(() => {
+                const element = document.getElementById(activeElementId);
+                if (element) (element as HTMLElement).focus();
+            }, 0);
         }
     }
 
@@ -125,21 +176,34 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
 
     // Удаляем всех обработчиков событий
     private _removeEvents() {
-        const { events = {} } = this.props;
-        if (this._element) {
-            Object.entries(events).forEach(([event, listener]) => {
-                if (typeof listener === 'function') {
-                    this._element!.removeEventListener(event, listener);
-                }
-            });
-        }
+        this._eventListeners.forEach(({ event, element, listener }) => {
+            element.removeEventListener(event, listener);
+        });
+        this._eventListeners = [];
     }
+
     private _addEvents() {
         const { events = {} } = this.props;
+
+        // Удаляем только обработчики, связанные с текущим элементом
+        this._removeEvents();
+        if (!this._element) return;
+
         // Добавляем обработчики с проверкой
         Object.entries(events).forEach(([event, listener]) => {
             if (typeof listener === 'function') {
-                this._element?.addEventListener(event, listener);
+                // Привязываем контекст и сохраняем ссылку на обработчик
+                const boundListener = (e: Event) => {
+                    e.stopPropagation(); // Добавляем stopPropagation по умолчанию
+                    //console.log(`Событие ${event} сработало на ${this.constructor.name}`);
+                    listener.call(this, e); // Явная привязка контекста
+                };
+                this._element!.addEventListener(event, boundListener);
+                this._eventListeners.push({
+                    event,
+                    element: this._element!,
+                    listener: boundListener
+                });
             }
         });
     }
@@ -161,10 +225,25 @@ export class Block<P extends Record<string, unknown> = Record<string, unknown>> 
         return this._element || document.createElement('div');
     }
 
+    // Добавляем массив для хранения обработчиков
+    private _eventListeners: { event: string; element: HTMLElement; listener: EventListener }[] = [];
+
     // Метод для полной очистки
     public destroy() {
         this._removeEvents();
-        this._element?.remove();
-        this._element = null;
+
+        // Рекурсивно уничтожаем дочерние компоненты
+        Object.values(this.children).forEach(child => {
+            if (Array.isArray(child)) {
+                child.forEach(c => c.destroy());
+            } else {
+                child.destroy();
+            }
+        });
+
+        if (this._element) {
+            this._element.remove();
+            this._element = null;
+        }
     }
 }

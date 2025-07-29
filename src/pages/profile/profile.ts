@@ -1,7 +1,10 @@
 import { Block } from '../../core/block';
 import template from './profile.hbs?raw';
-import { Input } from '../../components';
-import { Link } from '../../components';
+import { Input, Link } from '../../components';
+import Router from '../../utils/router';
+import { authController } from "../../controllers";
+import { store } from "../../core/store";
+import { API_V2_RESOURCES } from '../../config';
 
 interface ProfileProps {
     title?: string;
@@ -9,11 +12,20 @@ interface ProfileProps {
     id?: string;
     name?: string;
     errors?: Record<string, string>;
+    currentAvatar?: string;
 }
+
 export class ProfilePage extends Block {
+    private router: Router;
+
     constructor(props: ProfileProps = {}) {
+        const user = store.getState().user;
         super({
             ...props,
+            user: {
+                ...user,
+                display_name: user?.display_name || `${user?.first_name} ${user?.second_name}`.trim()
+            },
             errors: {},
             labelEmail: "Почта",
             labelLogin: "Логин",
@@ -27,17 +39,61 @@ export class ProfilePage extends Block {
             idSecondName: "secondName",
             idDisplayName: "displayName",
             idPhone: "phone",
+            idAvatar: "avatar",
+            emailValue: user?.email || '',
+            loginValue: user?.login || '',
+            firstNameValue: user?.first_name || '',
+            secondNameValue: user?.second_name || '',
+            displayNameValue: user?.display_name || '',
+            phoneValue: user?.phone || '',
+            currentAvatar: user?.avatar || ''
+        });
+
+        this.router = new Router();
+        store.on('changed', () => {
+            const newUser = store.getState().user;
+            if (newUser?.avatar !== this.props.currentAvatar) {
+                this.setProps({ currentAvatar: newUser?.avatar });
+                this.updateAvatarDisplay();
+            }
         });
     }
 
+    private updateAvatarDisplay() {
+        const user = store.getState().user;
+        const avatarElement = this._element?.querySelector('.avatar-input__default-icon') as HTMLElement;
+
+        if (!avatarElement) return;
+
+        // Очищаем стили и классы
+        avatarElement.className = '';
+        avatarElement.removeAttribute('style');
+
+        // Добавляем базовый класс
+        avatarElement.classList.add('avatar-input__default-icon');
+
+        if (user?.avatar) {
+            avatarElement.style.backgroundImage = `url("${API_V2_RESOURCES}${user.avatar}")`;
+            avatarElement.style.backgroundSize = 'cover';
+            avatarElement.style.borderRadius = '50%';
+        } else {
+            avatarElement.classList.add('avatar-default');
+        }
+    }
+
+    componentDidMount() {
+        this.updateAvatarDisplay();
+    }
+
     init() {
+        const user = store.getState().user;
 
         this.children.inputEmail = new Input({
             name: 'email',
             id: 'email',
             type: 'email',
-            value: 'neagz@yandex.ru',
-            placeholder: 'neagz@yandex.ru',
+            value: user?.email || '',
+            placeholder: user?.email || 'Почта',
             autocomplete: 'email',
             readonly: true
         });
@@ -46,8 +102,8 @@ export class ProfilePage extends Block {
             name: 'login',
             id: 'login',
             type: 'text',
-            value: 'neagz',
-            placeholder: 'neagz',
+            value: user?.login || '',
+            placeholder: user?.login || 'Логин',
             autocomplete: 'login',
             readonly: true
         });
@@ -56,8 +112,8 @@ export class ProfilePage extends Block {
             name: 'firstName',
             id: 'firstName',
             type: 'text',
-            value: 'Андрей',
-            placeholder: 'Андрей',
+            value: user?.first_name || '',
+            placeholder: user?.first_name || 'Имя',
             autocomplete: 'first_name',
             readonly: true
         });
@@ -66,8 +122,8 @@ export class ProfilePage extends Block {
             name: 'secondName',
             id: 'secondName',
             type: 'text',
-            value: 'Быстров',
-            placeholder: 'Быстров',
+            value: user?.second_name || '',
+            placeholder: user?.second_name || 'Фамилия',
             autocomplete: 'family_name',
             readonly: true
         });
@@ -76,8 +132,8 @@ export class ProfilePage extends Block {
             name: 'displayName',
             id: 'displayName',
             type: 'text',
-            value: 'Андрей Б.',
-            placeholder: 'Андрей Б.',
+            value: user?.display_name || '',
+            placeholder: user?.display_name || 'Имя в чате',
             autocomplete: 'name',
             readonly: true
         });
@@ -86,14 +142,13 @@ export class ProfilePage extends Block {
             name: 'phone',
             id: 'phone',
             type: 'text',
-            value: '+7 (999) 668 02 50',
-            placeholder: '+7 (999) 668 02 50',
+            value: user?.phone || '',
+            placeholder: user?.phone || 'Телефон',
             autocomplete: 'phone',
             readonly: true
         });
 
         this.children.linkEdit = new Link({
-            page: 'profile_edit',
             position: 'left',
             type: 'submit',
             style: 'profile_primary',
@@ -101,29 +156,33 @@ export class ProfilePage extends Block {
             events: {
                 click: (e: Event) => {
                     e.preventDefault();
-                    const form = document.getElementById('profile-form') as HTMLFormElement;
-
-                    if (form) {
-                        const formData = new FormData(form);
-                        const data = Object.fromEntries(formData.entries());
-                        console.log('Данные формы:', data);
-                    }
+                    this.router.go('/settings-edit');
                 }
             }
         });
 
         this.children.linkPassword = new Link({
-            page: 'profile_password',
             position: 'left',
             style: 'profile_primary',
-            name: 'Изменить пароль'
+            name: 'Изменить пароль',
+            events: {
+                click: (e: Event) => {
+                    e.preventDefault();
+                    this.router.go('/settings-password');
+                }
+            }
         });
 
         this.children.linkLogout = new Link({
-            page: 'nav',
             position: 'left',
             style: 'profile_secondary',
-            name: 'Выйти'
+            name: 'Выйти',
+            events: {
+                click: (e: Event) => {
+                    e.preventDefault();
+                    authController.logout();
+                }
+            }
         });
     }
 

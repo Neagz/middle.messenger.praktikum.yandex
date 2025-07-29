@@ -10,11 +10,14 @@ interface MessageProps {
     errorText?: string;
     validateRule?: ValidationRule;
     class?: string;
+    onEnter?: () => void;
+    [key: string]: unknown;
 }
 
-export class Message extends Block {
+export class Message extends Block<MessageProps> {
     private inputRef: HTMLInputElement | null = null;
-    private currentValue: string;
+    public currentValue: string = '';
+    private shouldPreserveFocus = false;
 
     constructor(props: MessageProps) {
         super({
@@ -26,20 +29,52 @@ export class Message extends Block {
             ) => {
                 return oldProps.error !== newProps.error ||
                     oldProps.class !== newProps.class;
-            }
+            },
         });
 
         this.currentValue = props.value || '';
 
     }
     init() {
-        // Создаем обработчики один раз при инициализации
         this.setProps({
             events: {
                 input: this.handleInput.bind(this),
-                blur: this.handleBlur.bind(this)
+                blur: this.handleBlur.bind(this),
+                keydown: this.handleKeyDown.bind(this)
             }
         });
+    }
+
+    public clear() {
+        this.preserveFocus();
+        // Отключаем временно события blur при очистке
+        this.setProps({ events: {} });
+
+        this.currentValue = '';
+        if (this.inputRef) {
+            this.inputRef.value = '';
+        }
+
+        // Восстанавливаем события после микротаска
+        setTimeout(() => {
+            this.setProps({
+                events: {
+                    blur: this.handleBlur.bind(this),
+                    input: this.handleInput.bind(this),
+                    keydown: this.handleKeyDown.bind(this)
+                }
+            });
+        }, 0);
+    }
+
+    private handleKeyDown(e: Event) {
+        const keyboardEvent = e as KeyboardEvent;
+        if (keyboardEvent.key === 'Enter' && typeof this.props.onEnter === 'function') {
+            keyboardEvent.preventDefault();
+            if (typeof this.props.onEnter === 'function') {
+                this.props.onEnter();
+            }
+        }
     }
 
     private handleInput(e: Event) {
@@ -52,7 +87,17 @@ export class Message extends Block {
         }
     }
 
+    public preserveFocus() {
+        this.shouldPreserveFocus = true;
+        setTimeout(() => this.shouldPreserveFocus = false, 100);
+    }
+
+// В handleBlur:
     private handleBlur() {
+        if (this.shouldPreserveFocus) {
+            this.inputRef?.focus();
+            return;
+        }
         this.validate();
     }
 

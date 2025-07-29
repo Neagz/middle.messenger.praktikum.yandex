@@ -7,7 +7,8 @@ interface ButtonProps {
     page?: string;
     style: string;
     events?: {
-        click: (_e: Event) => void;
+        submit?: (_e: Event) => void;
+        click?: (_e: Event) => void;
     };
 }
 
@@ -19,7 +20,6 @@ export class Button extends Block {
                 click: (e: Event) => {
                     // Для кнопок типа submit не выполняем переход
                     if (props.type !== 'submit' && props.page) {
-                        window.navigate(props.page);
                         e.preventDefault();
                     }
                     props.events?.click?.(e);

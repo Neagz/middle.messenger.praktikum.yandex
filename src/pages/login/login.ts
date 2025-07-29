@@ -1,9 +1,12 @@
 import { Block, BaseBlockProps } from '../../core/block';
 import template from './login.hbs?raw';
-import { Input } from '../../components/input/input';
-import { Button } from '../../components/button/button';
-import { Link } from '../../components/link/link';
+import { Input } from '../../components';
+import { Button } from '../../components';
+import { Link } from '../../components';
 import { ValidationRule, validationRules } from '../../utils/validation';
+import Router from '../../utils/router';
+import { ISignInData } from "../../utils/types";
+import { authController } from "../../controllers";
 
 // Расширяем базовые пропсы специфичными для страницы
 interface LoginPageProps extends BaseBlockProps {
@@ -19,6 +22,7 @@ interface LoginPageProps extends BaseBlockProps {
 
 export class LoginPage extends Block<LoginPageProps> {
     private isSubmitting = false;
+    private router: Router;
 
     constructor(props: LoginPageProps = {}) {
         super({
@@ -28,24 +32,26 @@ export class LoginPage extends Block<LoginPageProps> {
             idLogin: "login",
             labelPassword: "Пароль",
             idPassword: "password",
-            handleSubmit: (form: HTMLFormElement) => {
+            handleSubmit: async (form: HTMLFormElement) => {
                 if (this.isSubmitting) return;
                 this.isSubmitting = true;
 
                 try {
                     const formData = new FormData(form);
-                    const data = Object.fromEntries(formData.entries());
+                    const data = {
+                        login: formData.get('login') as string,
+                        password: formData.get('password') as string
+                    };
+
                     const errors: Record<string, string> = {};
                     let isValid = true;
 
-                    const loginValue = formData.get('login') as string;
-                    if (!validationRules.login(loginValue)) {
+                    if (!validationRules.login(data.login)) {
                         errors.login = 'Неверный логин';
                         isValid = false;
                     }
 
-                    const passwordValue = formData.get('password') as string;
-                    if (!validationRules.password(passwordValue)) {
+                    if (!validationRules.password(data.password)) {
                         errors.password = 'Неверный пароль';
                         isValid = false;
                     }
@@ -54,7 +60,7 @@ export class LoginPage extends Block<LoginPageProps> {
 
                     if (isValid) {
                         console.log('Данные формы:', data);
-                        window.navigate('list');
+                        await this.signIn(data);
                     }
                 } finally {
                     this.isSubmitting = false;
@@ -67,24 +73,39 @@ export class LoginPage extends Block<LoginPageProps> {
                         this.props.handleSubmit?.(form);
                     }
                 }
-            }
+            },
+        });
+
+        this.router = new Router();
+    }
+
+    async signIn(data: ISignInData) {
+        try {
+            await authController.signIn(data);
+            // Переход будет выполнен в authController
+        } catch (e) {
+            console.error('SignIn error:', e);
+            this.setProps({ errors: { form: 'Неверный логин или пароль' } });
+        }
+    }
+
+    componentDidMount() {
+        // Принудительно обновляем компонент после загрузки
+        this.setProps({
+            ...this.props,
+            forceUpdate: Math.random()
         });
     }
 
     handleBlur = (fieldName: string, value: string, rule: ValidationRule | undefined, errorText: string) => {
-        if (!rule) return;
+        if (!rule || !this._element) return; // Проверяем, что элемент еще существует
 
         const isValid = validationRules[rule](value);
         const error = isValid ? '' : errorText;
 
-        setTimeout(() => {
-            this.setProps({
-                errors: {
-                    ...this.props.errors,
-                    [fieldName]: error
-                }
-            });
-        }, 0);
+        queueMicrotask(() => {
+            this.setProps({ errors: { ...this.props.errors, [fieldName]: error } });
+        });
     }
 
     init() {
@@ -109,6 +130,7 @@ export class LoginPage extends Block<LoginPageProps> {
             type: 'text',
             autocomplete: 'login',
             validateRule: 'login' as ValidationRule,
+            placeholder: 'Логин',
             events: {
                 blur: (e: Event) => {
                     const target = e.target as HTMLInputElement;
@@ -128,6 +150,7 @@ export class LoginPage extends Block<LoginPageProps> {
             type: 'password',
             autocomplete: 'new-password',
             validateRule: 'password' as ValidationRule,
+            placeholder: 'Пароль',
             events: {
                 blur: (e: Event) => {
                     const target = e.target as HTMLInputElement;
@@ -148,10 +171,15 @@ export class LoginPage extends Block<LoginPageProps> {
         });
 
         this.children.link = new Link({
-            page: 'registration',
             position: 'center',
             style: 'primary',
-            name: 'Нет аккаунта?'
+            name: 'Нет аккаунта?',
+            events: {
+                click: (e: Event) => {
+                    e.preventDefault();
+                    this.router.go('/sign-up');
+                }
+            }
         });
     }
 

@@ -12,7 +12,7 @@ interface DialogProps {
     [key: string]: unknown;
 }
 
-export class Dialog extends Block {
+export class Dialog extends Block<DialogProps> {
     constructor(props: DialogProps) {
         super(props);
     }

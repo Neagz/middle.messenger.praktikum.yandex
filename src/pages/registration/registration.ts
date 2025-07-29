@@ -1,9 +1,10 @@
 import { Block } from '../../core/block';
 import template from './registration.hbs?raw';
-import { Input } from '../../components/input/input';
-import { Button } from '../../components/button/button';
-import { Link } from '../../components/link/link';
+import { Input, Button, Link } from '../../components';
 import {ValidationRule, validationRules} from '../../utils/validation';
+import Router from '../../utils/router';
+import { ISignUpData } from "../../utils/types";
+import { authController } from "../../controllers";
 
 interface RegistrationPageProps {
     title?: string;
@@ -32,6 +33,7 @@ interface RegistrationPageProps {
 
 export class RegistrationPage extends Block<RegistrationPageProps> {
     private isSubmitting = false;
+    private router: Router;
     constructor(props: RegistrationPageProps = {}) {
         super({
             ...props,
@@ -45,19 +47,19 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
             labelConfirmPassword: "Пароль (еще раз)",
             idEmail: "email",
             idLogin: "login",
-            idFirstName: "firstName",
-            idSecondName: "secondName",
+            idFirstName: "first_name",
+            idSecondName: "second_name",
             idPhone: "phone",
             idPassword: "password",
             idConfirmPassword: "confirmPassword",
 
-            handleSubmit: (form: HTMLFormElement) => {
+            handleSubmit: async (form: HTMLFormElement) => {
                 if (this.isSubmitting) return;
                 this.isSubmitting = true;
 
                 try {
                     const formData = new FormData(form);
-                    const data = Object.fromEntries(formData.entries());
+                    const data = Object.fromEntries(formData.entries()) as ISignUpData;
                     const errors: Record<string, string> = {};
                     let isValid = true;
 
@@ -73,15 +75,15 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
                         isValid = false;
                     }
 
-                    const firstNameValue = formData.get('firstName') as string;
+                    const firstNameValue = formData.get('first_name') as string;
                     if (!validationRules.name(firstNameValue)) {
-                        errors.firstName = 'Неверное Имя';
+                        errors.first_name = 'Неверное Имя';
                         isValid = false;
                     }
 
-                    const secondNameValue = formData.get('secondName') as string;
+                    const secondNameValue = formData.get('second_name') as string;
                     if (!validationRules.name(secondNameValue)) {
-                        errors.secondName = 'Неверная Фамилия';
+                        errors.second_name = 'Неверная Фамилия';
                         isValid = false;
                     }
 
@@ -106,10 +108,27 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
                     this.setProps({ errors });
 
                     if (isValid) {
+                        await authController.signUp({
+                            first_name: data.first_name,
+                            second_name: data.second_name,
+                            login: data.login,
+                            email: data.email,
+                            phone: data.phone,
+                            password: data.password
+                        });
                         console.log('Данные формы:', data);
-                        window.navigate('list');
+                        this.router.go('/messenger');
                     }
                 }
+
+                catch (error: unknown) {
+                    console.error('Registration error:', error);
+                    const errorMessage = error instanceof Error
+                        ? error.message
+                        : 'Ошибка регистрации';
+                    this.setProps({ errors: { form: errorMessage } });
+                }
+
                 finally {
                     this.isSubmitting = false;
                 }
@@ -124,6 +143,17 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
                 }
             }
         });
+        this.router = new Router();
+    }
+
+    componentDidMount() {
+        // Принудительно обновляем компонент после загрузки
+        setTimeout(() => {
+            this.setProps({
+                ...this.props,
+                forceUpdate: Math.random() // Произвольное изменение для триггера
+            });
+        }, 100);
     }
 
     handleBlur = (fieldName: string, value: string, rule: ValidationRule | undefined, errorText: string) => {
@@ -132,14 +162,9 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
         const isValid = validationRules[rule](value);
         const error = isValid ? '' : errorText;
 
-        setTimeout(() => {
-            this.setProps({
-                errors: {
-                    ...this.props.errors,
-                    [fieldName]: error
-                }
-            });
-        }, 0);
+        queueMicrotask(() => {
+            this.setProps({ errors: { ...this.props.errors, [fieldName]: error } });
+        });
     }
 
     init() {
@@ -163,6 +188,7 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
             type: 'email',
             autocomplete: 'email',
             validateRule: 'email' as ValidationRule,
+            placeholder: 'Почта',
             events: {
                 blur: (e: Event) => {
                     const target = e.target as HTMLInputElement;
@@ -182,6 +208,7 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
             type: 'text',
             autocomplete: 'login',
             validateRule: 'login' as ValidationRule,
+            placeholder: 'Логин',
             events: {
                 blur: (e: Event) => {
                     const target = e.target as HTMLInputElement;
@@ -196,11 +223,12 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
         });
 
         this.children.inputFirstName = new Input({
-            name: 'firstName',
-            id: 'firstName',
+            name: 'first_name',
+            id: 'first_name',
             type: 'text',
             autocomplete: 'first_name',
             validateRule: 'name' as ValidationRule,
+            placeholder: 'Имя',
             events: {
                 blur: (e: Event) => {
                     const target = e.target as HTMLInputElement;
@@ -215,11 +243,12 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
         });
 
         this.children.inputSecondName = new Input({
-            name: 'secondName',
-            id: 'secondName',
+            name: 'second_name',
+            id: 'second_name',
             type: 'text',
             autocomplete: 'family_name',
             validateRule: 'name' as ValidationRule,
+            placeholder: 'Фамилия',
             events: {
                 blur: (e: Event) => {
                     const target = e.target as HTMLInputElement;
@@ -239,6 +268,7 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
             type: 'text',
             autocomplete: 'phone',
             validateRule: 'phone' as ValidationRule,
+            placeholder: 'Телефон',
             events: {
                 blur: (e: Event) => {
                     const target = e.target as HTMLInputElement;
@@ -258,6 +288,7 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
             type: 'password',
             autocomplete: 'new-password',
             validateRule: 'password' as ValidationRule,
+            placeholder: 'Пароль',
             events: {
                 blur: (e: Event) => {
                     const target = e.target as HTMLInputElement;
@@ -277,6 +308,7 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
             type: 'password',
             autocomplete: 'new-password',
             validateRule: 'password' as ValidationRule,
+            placeholder: 'Пароль (еще раз)',
             events: {
                 blur: (e: Event) => {
                     const target = e.target as HTMLInputElement;
@@ -294,13 +326,29 @@ export class RegistrationPage extends Block<RegistrationPageProps> {
             name: 'Зарегистрироваться',
             type: 'submit',
             style: 'primary',
+            events: {
+                submit: (e: Event) => {
+                    e.preventDefault(); // Блокируем стандартную отправку формы
+                    const form = e.target as HTMLFormElement;
+
+                    if (form.method !== 'POST') { // Проверяем метод формы
+                        console.error('Форма должна использовать POST!');
+                        return;
+                    }
+                }
+            }
         });
 
         this.children.link = new Link({
-            page: 'login',
             position: 'center',
             style: 'primary',
-            name: 'Войти'
+            name: 'Войти',
+            events: {
+                click: (e: Event) => {
+                    e.preventDefault();
+                    this.router.go('/');
+                }
+            }
         });
     }
 

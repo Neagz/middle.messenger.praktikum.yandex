@@ -28,6 +28,16 @@ export class Input extends Block {
         });
     }
 
+    public getValue(): string {
+        const input = this.getContent() as HTMLInputElement;
+        return input.value;
+    }
+
+    public setValue(value: string): void {
+        const input = this.getContent() as HTMLInputElement;
+        input.value = value;
+    }
+
     protected render(): DocumentFragment {
         return this.compile(template, this.props); // Используем импортированный шаблон
     }

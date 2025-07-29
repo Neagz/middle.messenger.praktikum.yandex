@@ -6,17 +6,23 @@ interface DotsButtonProps {
     name: string;
     className?: string;
     type?: 'button' | 'submit' | 'reset';
-    events?: {
-        click: (_e: Event) => void;
-    };
+    onClick?: (_e: Event) => void;
+    [key: string]: unknown;
 }
 
-export class DotsButton extends Block {
+export class DotsButton extends Block<DotsButtonProps> {
     constructor(props: DotsButtonProps) {
         super({
             ...props,
             type: props.type || 'button',
-            className: props.className || ''
+            className: props.className || '',
+            events: {
+                click: (e: Event) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    props.onClick?.(e);
+                }
+            }
         });
     }
 
