@@ -13,7 +13,8 @@
     "lint:css": "stylelint src/**/*.css src/**/*.scss",
     "lint:fix-css": "stylelint --fix src/**/*.css src/**/*.scss",
     "lint": "npm run lint:ts && npm run lint:css",
-    "test": "mocha"
+    "test": "mocha",
+    "prepare": "husky install"
   },
   "engines": {
     "node": "23.8.0"
@@ -39,7 +40,9 @@
     "esm": "^3.2.25",
     "globals": "^16.1.0",
     "handlebars": "^4.7.8",
+    "husky": "^9.1.7",
     "jsdom": "^26.1.0",
+    "lint-staged": "^16.1.2",
     "mocha": "^11.7.1",
     "nanoid": "^5.1.5",
     "sinon": "^15.0.1",
