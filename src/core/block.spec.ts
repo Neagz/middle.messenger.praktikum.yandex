@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Block } from './block.ts';
+import { Block } from './block';
 
 describe('Block', () => {
     class TestBlock extends Block {
