@@ -9,10 +9,16 @@
     "noUnusedParameters": true,
     "strictNullChecks": true,
     "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true
   },
   "include": [
     "src/**/*.ts",
     ".eslintrc.cjs"
-  ]
+  ],
+  "ts-node": {
+    "transpileOnly": true,
+    "experimentalTypeStripping": false,
+    "experimentalSpecifierResolution": "node"
+  }
 }
