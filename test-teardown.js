@@ -1,4 +1,4 @@
-module.exports = async () => {
+export default async () => {
     // Принудительное завершение через 5 секунд
     const timeout = setTimeout(() => {
         console.log('Forcing test process exit');

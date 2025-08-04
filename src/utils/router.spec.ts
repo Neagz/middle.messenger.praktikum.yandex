@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import Router from './router.ts';
+import Router from './router';
 import { Block } from '../core/block';
 import sinon from "sinon";
 

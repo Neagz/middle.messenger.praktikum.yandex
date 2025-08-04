@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Block } from './block.ts';
+import { Block } from './block';
 
 describe('Block', () => {
     class TestBlock extends Block {
@@ -30,7 +30,7 @@ describe('Block', () => {
         void expect(clicked).to.be.true;
     });
 
-    it('should destroy and clean up', () => {
+    it('Должен запустить очистку destroy', () => {
         const block = new TestBlock({});
         const element = block.getContent();
         block.destroy();

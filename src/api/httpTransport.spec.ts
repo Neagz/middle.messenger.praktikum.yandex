@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import HTTPTransport from './httpTransport.ts';
+import HTTPTransport from './httpTransport';
 
 describe('HTTPTransport', () => {
     let http: HTTPTransport;
