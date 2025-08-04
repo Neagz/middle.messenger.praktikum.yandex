@@ -14,7 +14,8 @@
     "lint:fix-css": "stylelint --fix src/**/*.css src/**/*.scss",
     "lint": "npm run lint:ts && npm run lint:css",
     "test": "mocha",
-    "prepare": "husky install"
+    "prepare": "husky",
+    "lint-staged": "lint-staged"
   },
   "engines": {
     "node": "23.8.0"
@@ -31,7 +32,7 @@
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
     "chai": "^5.2.1",
-    "eslint": "^8.57.1",
+    "eslint": "^9.32.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-import-resolver-typescript": "^4.3.5",
     "eslint-plugin-import": "^2.31.0",
@@ -45,6 +46,7 @@
     "lint-staged": "^16.1.2",
     "mocha": "^11.7.1",
     "nanoid": "^5.1.5",
+    "prettier": "^3.6.2",
     "sinon": "^15.0.1",
     "sinon-chai": "^4.0.0",
     "stylelint": "^16.19.1",
@@ -66,6 +68,22 @@
       "mochaSetup.js",
       "test-teardown.js"
     ],
+    "loader": [
+      "ts-node/esm"
+    ],
     "exit": true
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,scss}": [
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,html}": [
+      "prettier --write"
+    ]
   }
 }
