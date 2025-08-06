@@ -14,5 +14,10 @@
   "include": [
     "src/**/*.ts",
     ".eslintrc.cjs"
-  ]
+  ],
+  "ts-node": {
+    "transpileOnly": true,
+    "experimentalTypeStripping": false,
+    "experimentalSpecifierResolution": "node"
+  }
 }
